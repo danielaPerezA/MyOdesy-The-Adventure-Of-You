@@ -1,20 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400;700&display=swap');
-
-:root {
-    --cream: #f5ede0;
-    --fondo: #F1E6DF;
-    --borde: #593325;
-    --letra: Miltonian Tattoo;
-    --cream-dark: #e8d9c5;
-    --brown-light: #c4a882;
-    --brown: #8b6343;
-    --brown-dark: #5c3d1e;
-    --brown-deep: #3b2410;
-
-    --off-white: #fdfaf6;
-    --shadow: rgba(59, 36, 16, 0.15);
-    --shadow-md: rgba(59, 36, 16, 0.25);
-}
+@use '../../../styles/variables.scss' as *;
 
 * {
     box-sizing: border-box;
