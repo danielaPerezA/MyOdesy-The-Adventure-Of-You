@@ -1,11 +1,6 @@
-import { Component } from '@angular/core';
+import { Injectable } from '@angular/core';
 
-@Component({
-  selector: 'app-finance',
-  imports: [],
-  templateUrl: './finance.html',
-  styleUrl: './finance.scss',
+@Injectable({
+  providedIn: 'root'
 })
-export class Finance {
-
-}
+export class FinanceService {}

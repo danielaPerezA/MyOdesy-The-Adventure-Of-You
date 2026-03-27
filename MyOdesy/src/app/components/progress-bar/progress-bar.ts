@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-progresbar',
+  selector: 'app-progress-bar',
   imports: [],
-  templateUrl: './progresbar.html',
-  styleUrl: './progresbar.scss',
+  templateUrl: './progress-bar.html',
+  styleUrl: './progress-bar.scss',
 })
-export class Progresbar {
+export class ProgressBar {
 
 }

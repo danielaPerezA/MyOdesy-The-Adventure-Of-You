@@ -1,11 +1,6 @@
-import { Component } from '@angular/core';
+import { Injectable } from '@angular/core';
 
-@Component({
-  selector: 'app-auth',
-  imports: [],
-  templateUrl: './auth.html',
-  styleUrl: './auth.scss',
+@Injectable({
+  providedIn: 'root'
 })
-export class Auth {
-
-}
+export class AuthService {}

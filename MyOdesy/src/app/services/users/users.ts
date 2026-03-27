@@ -1,11 +1,6 @@
-import { Component } from '@angular/core';
+import { Injectable } from '@angular/core';
 
-@Component({
-  selector: 'app-users',
-  imports: [],
-  templateUrl: './users.html',
-  styleUrl: './users.scss',
+@Injectable({
+  providedIn: 'root'
 })
-export class Users {
-
-}
+export class UsersService {}

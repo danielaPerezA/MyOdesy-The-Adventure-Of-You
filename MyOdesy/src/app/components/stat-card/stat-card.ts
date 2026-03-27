@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-statcard',
+  selector: 'app-stat-card',
   imports: [],
-  templateUrl: './statcard.html',
-  styleUrl: './statcard.scss',
+  templateUrl: './stat-card.html',
+  styleUrl: './stat-card.scss',
 })
-export class Statcard {
+export class StatCard {
 
 }

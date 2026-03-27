@@ -1,11 +1,6 @@
-import { Component } from '@angular/core';
+import { Injectable } from '@angular/core';
 
-@Component({
-  selector: 'app-gym',
-  imports: [],
-  templateUrl: './gym.html',
-  styleUrl: './gym.scss',
+@Injectable({
+  providedIn: 'root'
 })
-export class Gym {
-
-}
+export class GymService {}
