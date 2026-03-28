@@ -1,1 +1,28 @@
-<p>navbar works!</p>
+<nav class="navbar" [class.navbar--private]="isPrivate">
+  <div class="navbar__logo" routerLink="/" style="cursor: pointer;">
+     <span class="navbar__logo-text">MyOdesy</span>
+     <img src="assets/img/boatLogo.png" alt="MyOdesy" class="navbar__logo-img"/>
+  </div>
+
+  <!-- Links navegación — solo navbar privado -->
+  <div class="navbar__links" *ngIf="isPrivate">
+    <a routerLink="/home" routerLinkActive="active">Home</a>
+    <a routerLink="/finanzas" routerLinkActive="active">Finanzas</a>
+    <a routerLink="/gym" routerLinkActive="active">Gym</a>
+  </div>
+
+  <!-- Botones — solo navbar público -->
+  <div class="navbar__actions" *ngIf="!isPrivate">
+    <button class="btn-login" routerLink="/login">Login</button>
+    <button class="btn-signup" routerLink="/login">Sing Up →</button>
+  </div>
+
+  <!-- Usuario — solo navbar privado -->
+  <div class="navbar__user" *ngIf="isPrivate">
+    <img src="assets/icons/userIcon.png" alt="user" class="navbar__user-icon"/>
+    <span class="navbar__username">{{ username }}</span>
+    <button class="navbar__logout">
+      <img src="assets/icons/logOutIcon.png" alt="logout"/>
+    </button>
+  </div>
+</nav>

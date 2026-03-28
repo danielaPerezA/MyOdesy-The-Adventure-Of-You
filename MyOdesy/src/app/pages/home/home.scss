@@ -1,0 +1,117 @@
+.home-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--fondo);
+  position: relative;
+}
+
+.home-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  position: relative;
+  z-index: 1;
+  gap: 32px;
+}
+
+.home-greeting {
+  font-family: var(--letra);
+  font-size: 22px;
+  color: var(--brown-dark);
+  letter-spacing: 2px;
+  text-align: center;
+  text-decoration: underline;
+}
+
+.home-card {
+  background-color: rgba(196, 168, 130, 0.65);
+  border-radius: 16px;
+  border: 1.5px solid var(--card-border);
+  padding: 28px;
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 8px 24px var(--shadow-md);
+
+  &__mood {
+    background-color: rgba(245, 237, 224, 0.5);
+    border-radius: 10px;
+    padding: 16px 20px;
+
+    p {
+      font-family: var(--letra);
+      font-size: 13px;
+      color: var(--brown-deep);
+      text-align: center;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 60px;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-family: var(--letra);
+      font-size: 13px;
+      color: var(--brown-deep);
+      resize: none;
+    }
+  }
+
+  &__divider {
+    height: 1px;
+    background-color: var(--card-border);
+    opacity: 0.4;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  &__question {
+    font-family: var(--letra);
+    font-size: 14px;
+    color: var(--brown-deep);
+    letter-spacing: 1px;
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.home-btn {
+  font-family: var(--letra);
+  background-color: rgba(245, 237, 224, 0.7);
+  border: 1.5px solid var(--borde);
+  border-radius: 12px;
+  padding: 16px 32px;
+  color: var(--brown-deep);
+  cursor: pointer;
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-align: center;
+  line-height: 1.6;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  flex: 1;
+  max-width: 180px;
+
+  &:hover {
+    transform: scale(1.05);
+    background-color: var(--cream-dark);
+  }
+}

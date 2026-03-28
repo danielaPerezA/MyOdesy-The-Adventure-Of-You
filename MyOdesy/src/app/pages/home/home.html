@@ -1,1 +1,30 @@
-<p>home-page works!</p>
+<div class="home-page page-bg">
+  <app-navbar [isPrivate]="true" [username]="username" />
+
+  <main class="home-content">
+    <h1 class="home-greeting">Hola, {{ username }} ¿Cómo te sientes hoy?</h1>
+
+    <div class="home-card">
+      <div class="home-card__mood">
+        <p>¿Deseas registrar tu estado de ánimo o diferentes notas el día de hoy?</p>
+        <textarea placeholder="Escribe aquí..."></textarea>
+      </div>
+
+      <div class="home-card__divider"></div>
+
+      <div class="home-card__actions">
+        <p class="home-card__question">¿Qué deseas hacer primero?</p>
+        <div class="home-card__buttons">
+          <button class="home-btn" routerLink="/finanzas">
+            Gestionar<br/>Finanzas
+          </button>
+          <button class="home-btn" routerLink="/gym">
+            Gestionar<br/>Rutina GYM
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <app-footer />
+</div>

@@ -1,1 +1,142 @@
-<p>finance works!</p>
+<div class="finance-page page-bg">
+  <app-navbar [isPrivate]="true" [username]="username" />
+
+  <main class="finance-content">
+
+    <!-- COLUMNA IZQUIERDA -->
+    <div class="finance-left">
+
+      <!-- Header bienvenida -->
+      <div class="finance-header">
+        <p>Bienvenid@, <strong>{{ username }}</strong> a tu gestor</p>
+        <span>FINANCIERO</span>
+      </div>
+
+      <!-- Racha de ahorro -->
+    <div class="finance-streak">
+      <p class="finance-streak__title">Racha de ahorro</p>
+      <div class="finance-streak__months">
+        <span *ngFor="let m of months">{{ m }}</span>
+      </div>
+      <div class="finance-streak__bottom">
+        <div class="finance-streak__circles">
+          <span *ngFor="let i of circles" class="circle" [class.active]="i <= streakCount"></span>
+        </div>
+        <div class="finance-streak__counter">
+          <span class="streak-number">{{ streakCount }}</span>
+          <span>🔥</span>
+        </div>
+          </div>
+      </div>
+
+      <!-- Formularios -->
+      <div class="finance-forms">
+        <div class="form-row">
+          <label>Registrar saldo disponible</label>
+          <input type="number" [(ngModel)]="nuevoSaldo" placeholder="Monto"/>
+          <button (click)="registrarSaldo()">Registrar</button>
+        </div>
+
+        <div class="form-row">
+          <label>Registrar Gasto</label>
+          <div class="form-row__inline">
+            <input type="number" [(ngModel)]="nuevoGasto" placeholder="Monto"/>
+            <select [(ngModel)]="categoriaGasto">
+              <option value="" disabled selected>Categoría</option>
+              <option *ngFor="let c of categorias" [value]="c">{{ c }}</option>
+            </select>
+          </div>
+          <button (click)="registrarGasto()">Registrar</button>
+        </div>
+
+        <div class="form-row">
+          <label>Registrar ahorro</label>
+          <input type="number" [(ngModel)]="nuevoAhorro" placeholder="Monto"/>
+          <button (click)="registrarAhorro()">Registrar</button>
+        </div>
+
+        <div class="form-divider"></div>
+
+        <div class="form-row">
+          <label>Editar saldo disponible</label>
+          <input type="number" [(ngModel)]="editSaldo" placeholder="Ingrese nuevo monto disponible"/>
+          <button (click)="editarSaldo()">Editar</button>
+        </div>
+
+        <div class="form-row">
+          <label>Editar meta mensual</label>
+          <input type="number" [(ngModel)]="editMetaMensual" placeholder="Ingrese nueva meta mensual"/>
+          <button (click)="editarMetaMensual()">Editar</button>
+        </div>
+
+        <div class="form-row">
+          <label>Editar meta anual</label>
+          <input type="number" [(ngModel)]="editMetaAnual" placeholder="Ingrese nueva meta anual"/>
+          <button (click)="editarMetaAnual()">Editar</button>
+        </div>
+
+        <div class="form-row">
+          <label>Editar monto ahorrado</label>
+          <input type="number" [(ngModel)]="editAhorro" placeholder="Ingrese nuevo monto ahorrado"/>
+          <button (click)="editarAhorro()">Editar</button>
+        </div>
+
+        <div class="form-row">
+          <label>Editar monto de gastos</label>
+          <input type="number" [(ngModel)]="editGastos" placeholder="Ingrese nuevo monto de gastos"/>
+          <button (click)="editarGastos()">Editar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA -->
+    <div class="finance-right">
+
+      <!-- Stat cards -->
+      <div class="finance-stats">
+        <div class="stat-card">
+          <span class="stat-card__label">Saldo disponible</span>
+          <span class="stat-card__value">{{ saldoDisponible | number }} COP</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Monto de gastos</span>
+          <span class="stat-card__value">{{ montoGastos | number }} COP</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Meta anual</span>
+          <span class="stat-card__value">{{ metaAnual | number }} COP</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Meta Mensual</span>
+          <span class="stat-card__value">{{ metaMensual | number }} COP</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Monto ahorrado</span>
+          <span class="stat-card__value">{{ montoAhorrado | number }} COP</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Meta ahorro anual</span>
+          <span class="stat-card__value">{{ metaAhorroAnual | number }} COP</span>
+        </div>
+      </div>
+
+      <!-- Progreso anual -->
+      <div class="finance-progress">
+        <p class="finance-progress__title">Progreso anual de ahorro</p>
+        <div class="progress-list">
+          <div class="progress-item" *ngFor="let p of progresoAnual">
+            <span class="progress-item__month">{{ p.mes }}</span>
+            <div class="progress-item__bar">
+              <div class="progress-item__fill" [style.width]="p.porcentaje + '%'">
+                <span>{{ p.porcentaje }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <app-footer />
+</div>
