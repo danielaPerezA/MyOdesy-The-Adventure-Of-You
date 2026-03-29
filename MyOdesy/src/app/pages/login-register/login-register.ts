@@ -53,7 +53,7 @@ export class LoginRegister {
 
     localStorage.setItem('UsuarioLogueado', JSON.stringify(validUser));
     localStorage.setItem('emailUsuario', validUser.email);
-    this.router.navigate(['/home']);   // ← cambiado de /dashboard a /home
+    this.router.navigate(['/home']);
   }
 
   onRegister() {

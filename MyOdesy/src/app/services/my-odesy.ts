@@ -21,8 +21,6 @@ export class AuthService {
   private USERS_KEY = 'auth_users';
   private SESSION_KEY = 'auth_session';
 
-  // Signal: el usuario actual, reactivo
-
   currentUser = signal<AuthUser | null>(this.loadSession());
   private loadUsers(): User[] {
     const raw = localStorage.getItem(this.USERS_KEY);

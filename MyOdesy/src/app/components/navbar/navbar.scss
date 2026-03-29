@@ -111,4 +111,16 @@
       height: 22px;
     }
   }
+
+  .navbar__user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
 }

@@ -101,7 +101,7 @@
 
 .btn-started {
   font-family: var(--letra);
-  background-color: rgba(245, 237, 224, 0.7);
+  background-color: var(--btn-bg);
   border: 1.5px solid var(--borde);
   border-radius: 20px;
   padding: 10px 26px;
@@ -145,6 +145,7 @@
     color: var(--brown-deep);
     letter-spacing: 2px;
     margin-bottom: 40px;
+    text-align: center;
   }
 
   &__grid {
@@ -202,6 +203,7 @@
     color: var(--brown-deep);
     letter-spacing: 2px;
     margin-bottom: 40px;
+    text-align: center;
   }
 
   &__grid {

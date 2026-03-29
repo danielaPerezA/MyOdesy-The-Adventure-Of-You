@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -12,4 +12,16 @@ import { CommonModule } from '@angular/common';
 export class Navbar {
   @Input() isPrivate: boolean = false;
   @Input() username: string = '';
+
+  constructor(private router: Router) {}
+
+  goToProfile() {
+    this.router.navigate(['/perfil']);
+  }
+
+  logout() {
+    localStorage.removeItem('UsuarioLogueado');
+    localStorage.removeItem('emailUsuario');
+    this.router.navigate(['/']);
+  }
 }

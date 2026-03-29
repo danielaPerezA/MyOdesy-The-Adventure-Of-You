@@ -292,7 +292,7 @@ body {
 }
 
 .error-msg {
-    color: #c0392b;
+    color: var(--error);
     font-size: 0.82rem;
     text-align: center;
     margin: 0;

@@ -1,10 +1,154 @@
-<div class="start-page">
+<div class="gym-page page-bg">
   <app-navbar [isPrivate]="true" [username]="username" />
-  
-  <div class="gym-page page-bg">
 
-    <!-- aquí irá el contenido del landing -->
-  </div>
+  <main class="gym-content">
+
+    <div class="gym-left">
+
+      <div class="gym-header">
+        <p>Bienvenid@, <strong>{{ username }}</strong> a tu gestor</p>
+        <span>RUTINAS DEL GIMNASIO</span>
+      </div>
+
+      <div class="gym-streak">
+        <p class="gym-streak__title">Racha de entrenamiento</p>
+        <div class="gym-streak__calendar">
+          <div *ngFor="let d of weekDays" class="streak-col">
+            <span class="streak-day">{{ d }}</span>
+            <span class="circle" [class.active]="diasEntrenadosSemana[d]"></span>
+          </div>
+        </div>
+        <div class="gym-streak__counter">
+          <span class="streak-number">{{ streakCount }}</span>
+          <span class="streak-fire">🔥</span>
+        </div>
+      </div>
+
+      <div class="gym-week">
+        <p class="gym-week__title">Días entrenados en la semana</p>
+        <div class="gym-week__list">
+          <div class="week-row" *ngFor="let d of weekDays">
+            <span class="week-day">{{ d }}</span>
+            <input type="checkbox"
+              [checked]="diasEntrenadosSemana[d]"
+              (change)="toggleDia(d, $event)"/>
+            <select [(ngModel)]="categoriasDia[d]" class="week-select">
+              <option value="" disabled>Categoría</option>
+              <option *ngFor="let c of categorias" [value]="c">{{ c }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="gym-forms">
+        <div class="form-row">
+          <label>Editar Días entrenados esta semana</label>
+          <input type="number" [(ngModel)]="editDiasSemanaStr"
+            placeholder="Ingrese nuevo nro de días"/>
+          <button (click)="editarDiasSemana()">Editar</button>
+        </div>
+
+        <div class="form-row">
+          <label>Editar Días entrenados este mes</label>
+          <input type="number" [(ngModel)]="editDiasMesStr"
+            placeholder="Ingrese nuevo nro de días"/>
+          <button (click)="editarDiasMes()">Editar</button>
+        </div>
+
+        <div class="form-row">
+          <label>Editar meta semanal</label>
+          <input type="number" [(ngModel)]="editMetaSemanalStr"
+            placeholder="Ingrese nueva meta semanal"/>
+          <button (click)="editarMetaSemanal()">Editar</button>
+        </div>
+
+        <div class="form-row">
+          <label>Editar meta mensual</label>
+          <input type="number" [(ngModel)]="editMetaMensualStr"
+            placeholder="Ingrese nueva meta mensual"/>
+          <button (click)="editarMetaMensual()">Editar</button>
+        </div>
+
+        <div class="form-row">
+          <label>Editar meta anual</label>
+          <input type="number" [(ngModel)]="editMetaAnualStr"
+            placeholder="Ingrese nueva meta anual"/>
+          <button (click)="editarMetaAnual()">Editar</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="gym-right">
+
+      <div class="gym-stats">
+        <div class="stat-card">
+          <span class="stat-card__label">Días entrenados esta semana</span>
+          <span class="stat-card__value">{{ diasSemana }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Meta de días a la semana</span>
+          <span class="stat-card__value">{{ metaSemanal }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Días entrenados este mes</span>
+          <span class="stat-card__value">{{ diasMes }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Meta de días al mes</span>
+          <span class="stat-card__value">{{ metaMensual }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Días entrenados este año</span>
+          <span class="stat-card__value">{{ diasAnio }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Meta de días al año</span>
+          <span class="stat-card__value">{{ metaAnual }}</span>
+        </div>
+      </div>
+
+      <div class="gym-progress">
+        <p class="gym-progress__title">Progreso mensual del gym</p>
+        <div class="progress-list">
+          <div class="progress-item" *ngFor="let p of progresoMensual">
+            <span class="progress-item__month">{{ p.mes }}</span>
+            <div class="progress-item__track">
+              <div class="progress-item__bar">
+                <div class="progress-item__fill" [style.width]="p.porcentaje + '%'">
+                  <span *ngIf="p.porcentaje > 5">{{ p.porcentaje }}%</span>
+                </div>
+              </div>
+              <div class="progress-item__cat">
+                <span class="cat-emoji">💪</span>
+                <span class="cat-label">Más trabajado:</span>
+                <span class="cat-value">{{ p.categoria }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="gym-annual">
+        <div class="gym-annual__header">
+          <span class="gym-annual__title">🏋️ Meta anual de entrenamiento</span>
+          <span class="gym-annual__values">
+            {{ diasAnio }} / {{ metaAnual }} días
+          </span>
+        </div>
+        <div class="gym-annual__bar">
+          <div class="gym-annual__fill"
+            [style.width]="calcularProgresoAnual() + '%'">
+            <span *ngIf="calcularProgresoAnual() > 10">{{ calcularProgresoAnual() }}%</span>
+          </div>
+        </div>
+        <div class="gym-annual__footer">
+          <span class="gym-annual__label">Progreso acumulado del año</span>
+          <span class="gym-annual__percent">{{ calcularProgresoAnual() }}%</span>
+        </div>
+      </div>
+
+    </div>
+  </main>
 
   <app-footer />
 </div>
