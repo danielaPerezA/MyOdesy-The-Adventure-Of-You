@@ -1,0 +1,27 @@
+<nav class="navbar" [class.navbar--private]="isPrivate">
+  <div class="navbar__logo" routerLink="/" style="cursor: pointer;">
+     <span class="navbar__logo-text">MyOdesy</span>
+     <img src="assets/img/boatLogo.png" alt="MyOdesy" class="navbar__logo-img"/>
+  </div>
+
+  <div class="navbar__links" *ngIf="isPrivate">
+    <a routerLink="/home" routerLinkActive="active">Home</a>
+    <a routerLink="/finanzas" routerLinkActive="active">Finanzas</a>
+    <a routerLink="/gym" routerLinkActive="active">Gym</a>
+  </div>
+
+  <div class="navbar__actions" *ngIf="!isPrivate">
+    <button class="btn-login" routerLink="/login">Login</button>
+    <button class="btn-signup" routerLink="/login">Sing Up →</button>
+  </div>
+
+  <div class="navbar__user" *ngIf="isPrivate">
+    <div class="navbar__user-info" (click)="goToProfile()">
+      <img src="assets/icons/userIcon.png" alt="user" class="navbar__user-icon"/>
+      <span class="navbar__username">{{ username }}</span>
+    </div>
+    <button class="navbar__logout" (click)="logout()">
+      <img src="assets/icons/logOutIcon.png" alt="logout"/>
+    </button>
+  </div>
+</nav>

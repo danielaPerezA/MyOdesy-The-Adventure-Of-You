@@ -1,0 +1,95 @@
+<div class="user-profile-page page-bg">
+  <app-navbar [isPrivate]="true" [username]="username" />
+
+  <main class="user-profile-content">
+
+    <div class="profile-alert" *ngIf="!perfilCompleto">
+      <span>⚠️</span>
+      <p>Tu perfil está incompleto. Completa tus datos para tener todo bien organizado y sacarle el máximo provecho a MyOdesy.</p>
+      <button (click)="toggleForm()">Completar ahora</button>
+    </div>
+
+    <div class="profile-header">
+      <div class="profile-header__avatar">
+        <img src="assets/icons/userIcon.png" alt="avatar"/>
+      </div>
+      <div class="profile-header__info">
+        <h1>{{ datosUsuario.nombre || username }}</h1>
+        <p>{{ datosUsuario.email }}</p>
+        <span [class]="perfilCompleto ? 'badge badge--complete' : 'badge badge--incomplete'">
+          {{ perfilCompleto ? '✓ Perfil completo' : '⚠ Perfil incompleto' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <div class="profile-card__header" (click)="toggleForm()">
+        <span>Mis datos personales</span>
+        <span class="profile-card__arrow">{{ showForm ? '▲' : '▼' }}</span>
+      </div>
+
+      <div class="profile-form" *ngIf="showForm">
+        <div class="form-row">
+          <label>Nombres</label>
+          <input type="text" [(ngModel)]="datosUsuario.nombre" placeholder="Tu nombre completo"/>
+        </div>
+        <div class="form-row">
+          <label>Apellidos</label>
+          <input type="text" [(ngModel)]="datosUsuario.apellidos" placeholder="Tus apellidos"/>
+        </div>
+        <div class="form-row form-row--inline">
+          <div>
+            <label>Edad</label>
+            <input type="number" [(ngModel)]="datosUsuario.edad" placeholder="Edad"/>
+          </div>
+          <div>
+            <label>Número de celular</label>
+            <input type="text" [(ngModel)]="datosUsuario.celular" placeholder="Número de celular"/>
+          </div>
+        </div>
+        <div class="form-row">
+          <label>Usuario ¿Cómo quieres que te llamemos?</label>
+          <input type="text" [(ngModel)]="datosUsuario.usuario" placeholder="Nombre de usuario"/>
+        </div>
+        <button class="profile-save" (click)="guardarDatos()">Guardar datos →</button>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <div class="profile-card__header" (click)="toggleMetas()">
+        <span>Mis metas</span>
+        <span class="profile-card__arrow">{{ showMetas ? '▲' : '▼' }}</span>
+      </div>
+
+      <div class="profile-form" *ngIf="showMetas">
+        <p class="profile-form__section">💰 Meta de ahorro</p>
+        <div class="form-row form-row--inline">
+          <div>
+            <label>Mensual</label>
+            <input type="number" [(ngModel)]="datosUsuario.metaAhorroMensual" placeholder="Monto"/>
+          </div>
+          <div>
+            <label>Anual</label>
+            <input type="number" [(ngModel)]="datosUsuario.metaAhorroAnual" placeholder="Monto"/>
+          </div>
+        </div>
+
+        <p class="profile-form__section">🏋️ Meta de días en el gym</p>
+        <div class="form-row form-row--inline">
+          <div>
+            <label>Semanal</label>
+            <input type="number" [(ngModel)]="datosUsuario.metaGymSemanal" placeholder="Días"/>
+          </div>
+          <div>
+            <label>Mensual</label>
+            <input type="number" [(ngModel)]="datosUsuario.metaGymMensual" placeholder="Días"/>
+          </div>
+        </div>
+        <button class="profile-save" (click)="guardarMetas()">Guardar metas →</button>
+      </div>
+    </div>
+
+  </main>
+
+  <app-footer />
+</div>

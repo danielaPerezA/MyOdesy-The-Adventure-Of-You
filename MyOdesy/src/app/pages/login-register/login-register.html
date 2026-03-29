@@ -1,0 +1,99 @@
+<div class="login-page">
+  <app-navbar />
+
+<div class="login-register-page page-bg">
+
+  <main class="auth-wrapper">
+    <section class="auth-panel">
+      <article class="brand-tag">
+        <span class="brand-name">MyOdesy</span>
+        <p class="brand-tagline">The adventure begins with you.</p>
+      </article>
+
+      <section class="forms">
+        <section class="tab-switcher" aria-label="Seleccionar formulario">
+          <button class="tab-btn" [class.active]="activeTab === 'login'" (click)="switchTab('login')">
+            Login
+          </button>
+          <button class="tab-btn" [class.active]="activeTab === 'register'" (click)="switchTab('register')">
+            Register
+          </button>
+          <div class="tab-indicator" [class.right]="activeTab === 'register'"></div>
+        </section>
+
+        <article class="auth-form slide-in" *ngIf="activeTab === 'login'">
+          <form (ngSubmit)="onLogin()" #loginForm="ngForm">
+            <div class="form-group">
+              <label for="loginEmail">Email</label>
+              <input id="loginEmail" type="email" [(ngModel)]="loginData.email" name="email"
+                placeholder="tu@email.com" autocomplete="email" required />
+            </div>
+            <div class="form-group">
+              <label for="loginPassword">Password</label>
+              <input id="loginPassword" type="password" [(ngModel)]="loginData.password" name="password"
+                placeholder="••••••••" autocomplete="current-password" required />
+            </div>
+            <div class="remember-row">
+              <label class="checkbox-label" for="remember">
+                <input id="remember" type="checkbox" [(ngModel)]="loginData.remember" name="remember" />
+                <span class="checkmark"></span>
+                Remember Password
+              </label>
+            </div>
+            <p class="error-msg" role="alert" *ngIf="errorMsg">{{ errorMsg }}</p>
+            <button type="submit" class="submit-btn">
+              access <span class="btn-arrow">→</span>
+            </button>
+          </form>
+        </article>
+
+        <article class="auth-form slide-in" *ngIf="activeTab === 'register'">
+          <form (ngSubmit)="onRegister()" #registerForm="ngForm">
+            <div class="form-group">
+              <label for="regName">Name and Surname</label>
+              <input id="regName" type="text" [(ngModel)]="registerData.name" name="name"
+                placeholder="Your full name" autocomplete="name" required />
+            </div>
+            <div class="form-group">
+              <label for="regGenero">Gender</label>
+              <select id="regGenero" [(ngModel)]="registerData.genero" name="genero" required>
+                <option value="" disabled selected>Select your gender</option>
+                <option value="0">Male</option>
+                <option value="1">Female</option>
+                <option value="2">Other</option>
+                <option value="3">I prefer not to say</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="regEmail">Email</label>
+              <input id="regEmail" type="email" [(ngModel)]="registerData.email" name="email"
+                placeholder="tu@email.com" autocomplete="email" required />
+            </div>
+            <div class="form-group">
+              <label for="regPassword">Password</label>
+              <input id="regPassword" type="password" [(ngModel)]="registerData.password" name="password"
+                placeholder="••••••••" autocomplete="new-password" required />
+            </div>
+            <div class="remember-row">
+              <label class="checkbox-label" for="terms">
+                <input id="terms" type="checkbox" [(ngModel)]="registerData.terms" name="terms" required />
+                <span class="checkmark"></span>
+                I accept the terms and conditions
+              </label>
+            </div>
+            <p class="error-msg" role="alert" *ngIf="errorMsg">{{ errorMsg }}</p>
+            <button type="submit" class="submit-btn">
+              Register <span class="btn-arrow">→</span>
+            </button>
+          </form>
+        </article>
+      </section>
+
+      <div class="auth-footer">
+        <a class="back-link" routerLink="/">← Back to main page</a>
+      </div>
+    </section>
+  </main>
+
+  <app-footer />
+</div>
