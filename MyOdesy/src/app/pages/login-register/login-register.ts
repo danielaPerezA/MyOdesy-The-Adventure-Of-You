@@ -59,11 +59,6 @@ export class LoginRegister {
   onRegister() {
     this.errorMsg = '';
 
-    if (!this.registerData.terms) {
-      this.errorMsg = 'Debes aceptar los términos y condiciones.';
-      return;
-    }
-
     const usuarios: any[] = JSON.parse(localStorage.getItem('usuarios') || '[]');
     const existe = usuarios.find(u => u.email === this.registerData.email);
 
