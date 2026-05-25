@@ -41,8 +41,8 @@
               </label>
             </div>
             <p class="error-msg" role="alert" *ngIf="errorMsg">{{ errorMsg }}</p>
-            <button type="submit" class="submit-btn">
-              access <span class="btn-arrow">→</span>
+            <button type="submit" class="submit-btn" [disabled]="loading">
+              {{ loading ? 'Loading...' : 'access' }} <span class="btn-arrow">→</span>
             </button>
           </form>
         </article>
@@ -50,9 +50,19 @@
         <article class="auth-form slide-in" *ngIf="activeTab === 'register'">
           <form (ngSubmit)="onRegister()" #registerForm="ngForm">
             <div class="form-group">
-              <label for="regName">Name and Surname</label>
-              <input id="regName" type="text" [(ngModel)]="registerData.name" name="name"
-                placeholder="Your full name" autocomplete="name" required />
+              <label for="regFirstName">First name</label>
+              <input id="regFirstName" type="text" [(ngModel)]="registerData.firstName" name="firstName"
+                placeholder="Daniela" autocomplete="given-name" required />
+            </div>
+            <div class="form-group">
+              <label for="regLastName">Last name</label>
+              <input id="regLastName" type="text" [(ngModel)]="registerData.lastName" name="lastName"
+                placeholder="Pérez" autocomplete="family-name" required />
+            </div>
+            <div class="form-group">
+              <label for="regUsername">Username</label>
+              <input id="regUsername" type="text" [(ngModel)]="registerData.username" name="username"
+                placeholder="dani.perez" autocomplete="username" required />
             </div>
             <div class="form-group">
               <label for="regEmail">Email</label>
@@ -62,11 +72,18 @@
             <div class="form-group">
               <label for="regPassword">Password</label>
               <input id="regPassword" type="password" [(ngModel)]="registerData.password" name="password"
-                placeholder="••••••••" autocomplete="new-password" required />
+                placeholder="Min. 8 characters" autocomplete="new-password" required />
+            </div>
+            <div class="remember-row">
+              <label class="checkbox-label" for="terms">
+                <input id="terms" type="checkbox" [(ngModel)]="registerData.terms" name="terms" />
+                <span class="checkmark"></span>
+                I accept the terms
+              </label>
             </div>
             <p class="error-msg" role="alert" *ngIf="errorMsg">{{ errorMsg }}</p>
-            <button type="submit" class="submit-btn">
-              Register <span class="btn-arrow">→</span>
+            <button type="submit" class="submit-btn" [disabled]="loading">
+              {{ loading ? 'Creating...' : 'Register' }} <span class="btn-arrow">→</span>
             </button>
           </form>
         </article>

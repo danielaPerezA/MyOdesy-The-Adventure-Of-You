@@ -6,9 +6,17 @@
 
 body {
   background-color: var(--fondo);
-  font-family: var(--letra);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
+// Inputs y selects usan Lato por defecto
+input, select, textarea, button {
+  font-family: var(--font-body);
+}
+
+// Imagen de fondo fija y sutil en todas las páginas
 .page-bg {
   position: relative;
 
@@ -23,5 +31,267 @@ body {
     opacity: 0.15;
     pointer-events: none;
     z-index: 0;
+  }
+}
+
+// ── Animación global de barras de progreso ────────────────────────────────
+// Aplicar a cualquier elemento fill para que crezca al entrar en pantalla
+@keyframes barGrow {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+// ── Utilidades compartidas entre gym y finance ────────────────────────────
+
+// Círculos de racha
+.circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--brown-light);
+  background-color: transparent;
+  flex-shrink: 0;
+  transition: background-color 0.3s ease, border-color 0.3s ease,
+              box-shadow 0.3s ease, transform 0.2s ease;
+
+  &.active {
+    background-color: var(--brown);
+    border-color: var(--brown-dark);
+    box-shadow: 0 2px 8px rgba(92, 61, 30, 0.4);
+    transform: scale(1.12);
+  }
+}
+
+// Contador de racha
+.streak-number {
+  font-family: var(--font-body);
+  font-size: 56px;
+  font-weight: 900;
+  color: var(--brown-deep);
+  line-height: 1;
+  letter-spacing: -1px;
+}
+
+.streak-fire  { font-size: 40px; }
+.streak-label { font-family: var(--font-body); font-size: 12px; color: var(--brown); letter-spacing: 1px; }
+.streak-best  { font-family: var(--font-body); font-size: 11px; color: var(--brown-light); text-align: center; margin-top: 4px; }
+.streak-hint  { font-family: var(--font-body); font-size: 12px; color: var(--brown-light); font-style: italic; text-align: center; padding: 8px 0; }
+
+// Columna de streak (día/semana/mes)
+.streak-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.streak-day, .streak-month {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--brown);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+// Cards de estadísticas
+.stat-card {
+  background-color: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius-card);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  &__label {
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--brown);
+    text-align: center;
+  }
+
+  &__value {
+    font-family: var(--font-body);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--brown-deep);
+    text-align: center;
+    line-height: 1.2;
+  }
+}
+
+// Filas de formulario
+.form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--brown-dark);
+    letter-spacing: 0.5px;
+  }
+
+  input, select {
+    background-color: var(--input-bg);
+    border: 1.5px solid var(--brown-light);
+    border-radius: var(--radius-pill);
+    padding: 9px 18px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--brown-deep);
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &::placeholder {
+      color: var(--brown-light);
+      font-style: italic;
+    }
+    &:focus {
+      border-color: var(--brown);
+      box-shadow: 0 0 0 3px rgba(139, 99, 67, 0.15);
+    }
+  }
+
+  button {
+    align-self: flex-end;
+    background-color: var(--brown);
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 8px 22px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: var(--off-white);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(59, 36, 16, 0.22);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+
+    &:hover {
+      background-color: var(--brown-dark);
+      box-shadow: 0 4px 14px rgba(59, 36, 16, 0.3);
+      transform: translateY(-1px);
+    }
+    &:active {
+      transform: translateY(0);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+
+  &__inline {
+    display: flex;
+    gap: 10px;
+    input, select { flex: 1; }
+  }
+}
+
+.form-divider {
+  height: 1px;
+  background-color: var(--card-border);
+  margin: 4px 0;
+}
+
+// Barras de progreso mensual
+.progress-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: space-between;
+  gap: 2px;
+}
+
+.progress-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  &__month {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--brown);
+    min-width: 28px;
+    text-align: right;
+    padding-top: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  &__track {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__bar {
+    height: 20px;
+    background-color: var(--bar-track);
+    border-radius: 10px;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  &__fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--brown-dark), var(--brown-light));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    min-width: 0;
+    transform-origin: left center;
+    transition: width 0.6s ease;
+    animation: barGrow 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+    span {
+      font-family: var(--font-body);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--off-white);
+      white-space: nowrap;
+    }
+  }
+}
+
+.progress-item__cat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  background-color: var(--cat-bg);
+  border-radius: var(--radius-pill);
+  width: fit-content;
+  margin-top: 2px;
+
+  .cat-emoji { font-size: 11px; }
+
+  .cat-label {
+    font-family: var(--font-body);
+    font-size: 10px;
+    color: var(--brown);
+    opacity: 0.8;
+  }
+
+  .cat-value {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--brown-dark);
   }
 }

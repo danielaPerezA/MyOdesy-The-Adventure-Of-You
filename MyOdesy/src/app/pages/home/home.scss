@@ -3,7 +3,6 @@
   flex-direction: column;
   min-height: 100vh;
   background-color: var(--fondo);
-  position: relative;
 }
 
 .home-content {
@@ -11,107 +10,376 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  position: relative;
-  z-index: 1;
-  gap: 32px;
+  padding: 36px 24px 48px;
+  gap: 36px;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .home-greeting {
   font-family: var(--letra);
-  font-size: 22px;
-  color: var(--brown-dark);
+  font-size: 24px;
+  color: var(--brown-deep);
   letter-spacing: 2px;
   text-align: center;
-  text-decoration: underline;
+
+  strong { font-style: italic; }
 }
 
-.home-card {
-  background-color: rgba(196, 168, 130, 0.65);
-  border-radius: 16px;
-  border: 1.5px solid var(--card-border);
-  padding: 28px;
-  width: 100%;
-  max-width: 560px;
+// ── Toasts flotantes ──────────────────────────────────────────────────────
+
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1000;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  box-shadow: 0 8px 24px var(--shadow-md);
+  gap: 10px;
+  max-width: 320px;
+  width: calc(100vw - 48px);
+  pointer-events: none; // el contenedor no intercepta clicks
+}
 
-  &__mood {
-    background-color: rgba(245, 237, 224, 0.5);
-    border-radius: 10px;
-    padding: 16px 20px;
+.toast {
+  pointer-events: all;
+  border-radius: var(--radius-card);
+  border: 1.5px solid transparent;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 8px 24px rgba(59, 36, 16, 0.22);
+  animation: toastIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 
-    p {
-      font-family: var(--letra);
-      font-size: 13px;
-      color: var(--brown-deep);
-      text-align: center;
-      line-height: 1.6;
-      margin-bottom: 12px;
-    }
+  &--warn {
+    background-color: #fff2f0;
+    border-color: rgba(192, 57, 43, 0.4);
 
-    textarea {
-      width: 100%;
-      height: 60px;
-      background: transparent;
-      border: none;
-      outline: none;
-      font-family: var(--letra);
-      font-size: 13px;
-      color: var(--brown-deep);
-      resize: none;
+    .toast__btn {
+      background-color: rgba(192, 57, 43, 0.12);
+      color: #8b1a0f;
+      &:hover { background-color: rgba(192, 57, 43, 0.22); }
     }
   }
 
-  &__divider {
-    height: 1px;
-    background-color: var(--card-border);
-    opacity: 0.4;
+  &--info {
+    background-color: var(--cream);
+    border-color: var(--card-border);
+
+    .toast__btn {
+      background-color: var(--btn-bg);
+      color: var(--brown-dark);
+      &:hover { background-color: var(--cream-dark); }
+    }
   }
 
-  &__actions {
+  &__top {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
+    align-items: flex-start;
+    gap: 10px;
   }
 
-  &__question {
+  &__icono { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+
+  &__mensaje {
     font-family: var(--letra);
-    font-size: 14px;
+    font-size: 11.5px;
     color: var(--brown-deep);
-    letter-spacing: 1px;
+    letter-spacing: 0.3px;
+    line-height: 1.55;
+    flex: 1;
   }
 
-  &__buttons {
-    display: flex;
-    gap: 20px;
-    width: 100%;
-    justify-content: center;
+  &__close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--brown-light);
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: color 0.15s ease;
+    &:hover { color: var(--brown-deep); }
+  }
+
+  &__btn {
+    align-self: flex-end;
+    font-family: var(--letra);
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    padding: 5px 14px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.15s ease;
+    &:hover { transform: scale(1.04); }
   }
 }
 
-.home-btn {
-  font-family: var(--letra);
-  background-color: var(--btn-bg);
-  border: 1.5px solid var(--borde);
-  border-radius: 12px;
-  padding: 16px 32px;
-  color: var(--brown-deep);
-  cursor: pointer;
-  font-size: 13px;
-  letter-spacing: 1px;
-  text-align: center;
-  line-height: 1.6;
-  transition: transform 0.2s ease, background-color 0.2s ease;
-  flex: 1;
-  max-width: 180px;
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0)   scale(1); }
+}
+
+// ── Secciones ─────────────────────────────────────────────────────────────
+
+.home-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  &__title {
+    font-family: var(--letra);
+    font-size: 13px;
+    color: var(--brown);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding-left: 4px;
+    border-left: 3px solid var(--brown);
+    padding-left: 10px;
+  }
+}
+
+// ── A: Rachas ─────────────────────────────────────────────────────────────
+
+.home-rachas {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.racha-card {
+  background-color: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius-card);
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
-    transform: scale(1.05);
-    background-color: var(--cream-dark);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
   }
+
+  &__icon {
+    font-size: 40px;
+    flex-shrink: 0;
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__label {
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--brown);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  &__value {
+    font-family: var(--font-body);
+    font-size: 48px;
+    font-weight: 900;
+    color: var(--brown-deep);
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+
+  &__best {
+    font-family: var(--font-body);
+    font-size: 11px;
+    color: var(--brown-light);
+    letter-spacing: 0.5px;
+  }
+
+  // Acento lateral por módulo
+  &--gym  { border-left: 4px solid var(--brown-dark); }
+  &--fin  { border-left: 4px solid var(--success); }
+}
+
+// ── B: Pendientes ─────────────────────────────────────────────────────────
+
+.home-pendientes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.pendiente-card {
+  background-color: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius-card);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s ease;
+
+  &:hover { transform: translateY(-2px); }
+
+  // Estado completado: fondo levemente verde
+  &--done {
+    background-color: rgba(74, 122, 53, 0.12);
+    border-color: rgba(74, 122, 53, 0.4);
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  &__icon { font-size: 20px; flex-shrink: 0; }
+
+  &__label {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--brown-deep);
+    letter-spacing: 0.3px;
+    flex: 1;
+  }
+
+  &__badge {
+    font-family: var(--letra);
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    background-color: rgba(74, 122, 53, 0.2);
+    color: var(--success);
+    letter-spacing: 0.5px;
+
+    &--pending {
+      background-color: rgba(139, 99, 67, 0.15);
+      color: var(--brown-dark);
+    }
+  }
+
+  &__link {
+    font-family: var(--letra);
+    font-size: 11px;
+    color: var(--brown);
+    text-decoration: none;
+    letter-spacing: 1px;
+    align-self: flex-end;
+    transition: color 0.2s ease;
+
+    &:hover { color: var(--brown-dark); }
+  }
+}
+
+.pendiente-bar {
+  height: 8px;
+  background-color: var(--bar-track);
+  border-radius: 4px;
+  overflow: hidden;
+
+  &__fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s ease;
+
+    &--gym { background: linear-gradient(90deg, var(--brown-dark), var(--brown-light)); }
+    &--fin { background: linear-gradient(90deg, #3a6127, #6aab4e); }
+  }
+}
+
+// ── C: Métricas ───────────────────────────────────────────────────────────
+
+.home-metricas {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.metrica-card {
+  background-color: var(--card-bg);
+  border: 1.5px solid var(--card-border);
+  border-radius: var(--radius-card);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px var(--shadow);
+  }
+
+  &__label {
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--brown);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  &__value {
+    font-family: var(--font-body);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--brown-deep);
+    line-height: 1.2;
+  }
+
+  &__sub {
+    font-family: var(--font-body);
+    font-size: 10px;
+    color: var(--brown-light);
+    letter-spacing: 0.3px;
+  }
+
+  &__pct {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--brown-dark);
+    text-align: right;
+  }
+}
+
+.metrica-bar {
+  height: 6px;
+  background-color: var(--bar-track);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 4px;
+
+  &__fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+
+    &--gym { background: linear-gradient(90deg, var(--brown-dark), var(--brown-light)); }
+    &--fin { background: linear-gradient(90deg, #3a6127, #6aab4e); }
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────
+
+@media (max-width: 768px) {
+  .home-rachas,
+  .home-pendientes { grid-template-columns: 1fr; }
+
+  .home-metricas { grid-template-columns: 1fr 1fr; }
+
+  .racha-card__value { font-size: 32px; }
+}
+
+@media (max-width: 480px) {
+  .home-metricas { grid-template-columns: 1fr; }
 }

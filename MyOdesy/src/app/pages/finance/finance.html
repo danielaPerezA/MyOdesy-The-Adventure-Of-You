@@ -10,17 +10,37 @@
         <span>FINANCIERO</span>
       </div>
 
+      <!-- RACHA: círculos de solo lectura generados por el sistema -->
       <div class="finance-streak">
         <p class="finance-streak__title">Racha de ahorro</p>
-        <div class="finance-streak__calendar">
-          <div *ngFor="let m of months; let i = index" class="streak-col">
-            <span class="streak-month">{{ m }}</span>
-            <span class="circle" [class.active]="i < streakCount"></span>
+        <p class="finance-streak__subtitle">
+          Frecuencia: <strong>{{ frecuenciaAhorro }}</strong>
+        </p>
+
+        <div class="finance-streak__calendar" *ngIf="cantidadFrecuencias > 0">
+          <div *ngFor="let i of getRange(cantidadFrecuencias)" class="streak-col">
+            <span class="streak-month">
+              {{ frecuenciaAhorro === 'semanal' ? 'S' + (i + 1) : 'M' + (i + 1) }}
+            </span>
+            <span class="circle" [class.active]="i < getCirculosActivos()"></span>
           </div>
         </div>
+
         <div class="finance-streak__counter">
           <span class="streak-number">{{ streakCount }}</span>
           <span class="streak-fire">🔥</span>
+        </div>
+        <p class="streak-best">Mayor racha: {{ mayorRacha }}</p>
+
+        <!-- Progreso del período actual -->
+        <div class="streak-period-progress" *ngIf="(metaAhorroPorFrecuencia || metaMensual) > 0">
+          <p class="streak-period-label">
+            Período actual: {{ formatMonto(ahorroFrecuenciaActual) }} /
+            {{ formatMonto(metaAhorroPorFrecuencia || metaMensual) }} COP
+          </p>
+          <div class="streak-period-bar">
+            <div class="streak-period-fill" [style.width]="calcularProgresoFrecuencia() + '%'"></div>
+          </div>
         </div>
       </div>
 
@@ -28,18 +48,20 @@
 
         <div class="form-row">
           <label>Registrar saldo disponible</label>
-          <input type="text" [(ngModel)]="nuevoSaldoStr"
-            placeholder="Monto"
-            (blur)="nuevoSaldoStr = formatMonto(parseMonto(nuevoSaldoStr))"/>
+          <input type="text"
+            [ngModel]="nuevoSaldoStr"
+            (input)="onMontoInput($event, 'nuevoSaldoStr')"
+            placeholder="Ej: 1.500.000"/>
           <button (click)="registrarSaldo()">Registrar</button>
         </div>
 
         <div class="form-row">
           <label>Registrar Gasto</label>
           <div class="form-row__inline">
-            <input type="text" [(ngModel)]="nuevoGastoStr"
-              placeholder="Monto"
-              (blur)="nuevoGastoStr = formatMonto(parseMonto(nuevoGastoStr))"/>
+            <input type="text"
+              [ngModel]="nuevoGastoStr"
+              (input)="onMontoInput($event, 'nuevoGastoStr')"
+              placeholder="Ej: 50.000"/>
             <select [(ngModel)]="categoriaGasto">
               <option value="" disabled selected>Categoría</option>
               <option *ngFor="let c of categorias" [value]="c">{{ c }}</option>
@@ -50,51 +72,87 @@
 
         <div class="form-row">
           <label>Registrar ahorro</label>
-          <input type="text" [(ngModel)]="nuevoAhorroStr"
-            placeholder="Monto"
-            (blur)="nuevoAhorroStr = formatMonto(parseMonto(nuevoAhorroStr))"/>
+          <input type="text"
+            [ngModel]="nuevoAhorroStr"
+            (input)="onMontoInput($event, 'nuevoAhorroStr')"
+            placeholder="Ej: 200.000"/>
           <button (click)="registrarAhorro()">Registrar</button>
         </div>
 
         <div class="form-divider"></div>
 
         <div class="form-row">
+          <label>Frecuencia de ahorro</label>
+          <div class="form-row__inline">
+            <button
+              [class.active]="frecuenciaAhorro === 'semanal'"
+              (click)="cambiarFrecuencia('semanal')">Semanal</button>
+            <button
+              [class.active]="frecuenciaAhorro === 'mensual'"
+              (click)="cambiarFrecuencia('mensual')">Mensual</button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label>Cantidad de períodos a mostrar en la racha</label>
+          <input type="number" [(ngModel)]="editCantidadFrecuenciasStr"
+            placeholder="Ej: 4 semanas ó 12 meses"/>
+          <button (click)="configurarCantidadFrecuencias()">Configurar</button>
+        </div>
+
+        <div class="form-row">
+          <label>Meta de ahorro por período</label>
+          <input type="text"
+            [ngModel]="editMetaFrecuenciaStr"
+            (input)="onMontoInput($event, 'editMetaFrecuenciaStr')"
+            placeholder="Ej: 500.000"/>
+          <button (click)="editarMetaFrecuencia()">Editar</button>
+        </div>
+
+        <div class="form-divider"></div>
+
+        <div class="form-row">
           <label>Editar saldo disponible</label>
-          <input type="text" [(ngModel)]="editSaldoStr"
-            placeholder="Ingrese nuevo monto disponible"
-            (blur)="editSaldoStr = formatMonto(parseMonto(editSaldoStr))"/>
+          <input type="text"
+            [ngModel]="editSaldoStr"
+            (input)="onMontoInput($event, 'editSaldoStr')"
+            placeholder="Ej: 1.000.000"/>
           <button (click)="editarSaldo()">Editar</button>
         </div>
 
         <div class="form-row">
           <label>Editar meta mensual</label>
-          <input type="text" [(ngModel)]="editMetaMensualStr"
-            placeholder="Ingrese nueva meta mensual"
-            (blur)="editMetaMensualStr = formatMonto(parseMonto(editMetaMensualStr))"/>
+          <input type="text"
+            [ngModel]="editMetaMensualStr"
+            (input)="onMontoInput($event, 'editMetaMensualStr')"
+            placeholder="Ej: 500.000"/>
           <button (click)="editarMetaMensual()">Editar</button>
         </div>
 
         <div class="form-row">
           <label>Editar meta anual</label>
-          <input type="text" [(ngModel)]="editMetaAnualStr"
-            placeholder="Ingrese nueva meta anual"
-            (blur)="editMetaAnualStr = formatMonto(parseMonto(editMetaAnualStr))"/>
+          <input type="text"
+            [ngModel]="editMetaAnualStr"
+            (input)="onMontoInput($event, 'editMetaAnualStr')"
+            placeholder="Ej: 6.000.000"/>
           <button (click)="editarMetaAnual()">Editar</button>
         </div>
 
         <div class="form-row">
           <label>Editar monto ahorrado</label>
-          <input type="text" [(ngModel)]="editAhorroStr"
-            placeholder="Ingrese nuevo monto ahorrado"
-            (blur)="editAhorroStr = formatMonto(parseMonto(editAhorroStr))"/>
+          <input type="text"
+            [ngModel]="editAhorroStr"
+            (input)="onMontoInput($event, 'editAhorroStr')"
+            placeholder="Ej: 1.200.000"/>
           <button (click)="editarAhorro()">Editar</button>
         </div>
 
         <div class="form-row">
           <label>Editar monto de gastos</label>
-          <input type="text" [(ngModel)]="editGastosStr"
-            placeholder="Ingrese nuevo monto de gastos"
-            (blur)="editGastosStr = formatMonto(parseMonto(editGastosStr))"/>
+          <input type="text"
+            [ngModel]="editGastosStr"
+            (input)="onMontoInput($event, 'editGastosStr')"
+            placeholder="Ej: 800.000"/>
           <button (click)="editarGastos()">Editar</button>
         </div>
 
@@ -117,16 +175,16 @@
           <span class="stat-card__value">{{ formatMonto(metaAnual) }} COP</span>
         </div>
         <div class="stat-card">
-          <span class="stat-card__label">Meta Mensual</span>
+          <span class="stat-card__label">Meta mensual</span>
           <span class="stat-card__value">{{ formatMonto(metaMensual) }} COP</span>
         </div>
         <div class="stat-card">
-          <span class="stat-card__label">Monto ahorrado</span>
+          <span class="stat-card__label">Monto ahorrado total</span>
           <span class="stat-card__value">{{ formatMonto(montoAhorrado) }} COP</span>
         </div>
         <div class="stat-card">
-          <span class="stat-card__label">Meta ahorro anual</span>
-          <span class="stat-card__value">{{ formatMonto(metaAhorroAnual) }} COP</span>
+          <span class="stat-card__label">Meta por período</span>
+          <span class="stat-card__value">{{ formatMonto(metaAhorroPorFrecuencia || metaMensual) }} COP</span>
         </div>
       </div>
 

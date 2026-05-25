@@ -1,29 +1,155 @@
+<!-- ── ALERTAS FLOTANTES (no bloquean el contenido) ──────────────────────── -->
+<div class="toast-container" *ngIf="alertasVisibles.length > 0">
+  <div
+    *ngFor="let alerta of alertasVisibles"
+    class="toast"
+    [class.toast--warn]="alerta.tipo === 'warn'"
+    [class.toast--info]="alerta.tipo === 'info'">
+
+    <div class="toast__top">
+      <span class="toast__icono">{{ alerta.icono }}</span>
+      <span class="toast__mensaje">{{ alerta.mensaje }}</span>
+      <button class="toast__close" (click)="dismissAlerta(alerta.id)" title="Cerrar">×</button>
+    </div>
+
+    <button class="toast__btn" (click)="irAConfigurar(alerta.ruta)">
+      {{ alerta.labelBtn }} →
+    </button>
+  </div>
+</div>
+
 <div class="home-page page-bg">
   <app-navbar [isPrivate]="true" [username]="username" />
 
   <main class="home-content">
-    <h1 class="home-greeting">Hola, {{ username }} ¿Cómo te sientes hoy?</h1>
 
-    <div class="home-card">
-      <div class="home-card__mood">
-        <p>¿Deseas registrar tu estado de ánimo o diferentes notas el día de hoy?</p>
-        <textarea placeholder="Escribe aquí..."></textarea>
-      </div>
+    <h1 class="home-greeting">Hola, <strong>{{ username }}</strong> 👋</h1>
 
-      <div class="home-card__divider"></div>
 
-      <div class="home-card__actions">
-        <p class="home-card__question">¿Qué deseas hacer primero?</p>
-        <div class="home-card__buttons">
-          <button class="home-btn" routerLink="/finanzas">
-            Gestionar<br/>Finanzas
-          </button>
-          <button class="home-btn" routerLink="/gym">
-            Gestionar<br/>Rutina GYM
-          </button>
+    <!-- ── A: RACHAS ─────────────────────────────────────────────────────── -->
+    <section class="home-section">
+      <h2 class="home-section__title">Tus rachas</h2>
+      <div class="home-rachas">
+
+        <div class="racha-card racha-card--gym">
+          <span class="racha-card__icon">🏋️</span>
+          <div class="racha-card__info">
+            <span class="racha-card__label">Racha GYM</span>
+            <span class="racha-card__value">{{ gymStreakCount }} 🔥</span>
+            <span class="racha-card__best">Mayor: {{ gymMayorRacha }}</span>
+          </div>
         </div>
+
+        <div class="racha-card racha-card--fin">
+          <span class="racha-card__icon">💰</span>
+          <div class="racha-card__info">
+            <span class="racha-card__label">Racha Ahorro</span>
+            <span class="racha-card__value">{{ finStreakCount }} 🔥</span>
+            <span class="racha-card__best">Mayor: {{ finMayorRacha }}</span>
+          </div>
+        </div>
+
       </div>
-    </div>
+    </section>
+
+    <!-- ── B: PENDIENTES ─────────────────────────────────────────────────── -->
+    <section class="home-section">
+      <h2 class="home-section__title">Esta semana</h2>
+      <div class="home-pendientes">
+
+        <!-- GYM pendiente -->
+        <div class="pendiente-card" [class.pendiente-card--done]="gymSemanaCompleta">
+          <div class="pendiente-card__header">
+            <span class="pendiente-card__icon">🏋️</span>
+            <span class="pendiente-card__label">Días de gym</span>
+            <span class="pendiente-card__badge" *ngIf="gymSemanaCompleta">✔ Completado</span>
+            <span class="pendiente-card__badge pendiente-card__badge--pending" *ngIf="!gymSemanaCompleta && gymCantidadDiasGymSemana > 0">
+              {{ gymDiasSemana }} / {{ gymCantidadDiasGymSemana }}
+            </span>
+            <span class="pendiente-card__badge pendiente-card__badge--pending" *ngIf="gymCantidadDiasGymSemana === 0">
+              Sin configurar
+            </span>
+          </div>
+          <div class="pendiente-bar" *ngIf="gymCantidadDiasGymSemana > 0">
+            <div class="pendiente-bar__fill pendiente-bar__fill--gym"
+              [style.width]="gymProgresoSemana + '%'">
+            </div>
+          </div>
+          <a class="pendiente-card__link" routerLink="/gym">Ir al gym →</a>
+        </div>
+
+        <!-- AHORRO pendiente -->
+        <div class="pendiente-card" [class.pendiente-card--done]="finPeriodoCompleto">
+          <div class="pendiente-card__header">
+            <span class="pendiente-card__icon">💰</span>
+            <span class="pendiente-card__label">
+              Ahorro {{ finFrecuencia === 'semanal' ? 'semanal' : 'mensual' }}
+            </span>
+            <span class="pendiente-card__badge" *ngIf="finPeriodoCompleto">✔ Completado</span>
+            <span class="pendiente-card__badge pendiente-card__badge--pending" *ngIf="!finPeriodoCompleto && finMetaPorFrecuencia > 0">
+              {{ formatMonto(finAhorroFrecuenciaActual) }} / {{ formatMonto(finMetaPorFrecuencia) }}
+            </span>
+            <span class="pendiente-card__badge pendiente-card__badge--pending" *ngIf="finMetaPorFrecuencia === 0">
+              Sin meta
+            </span>
+          </div>
+          <div class="pendiente-bar" *ngIf="finMetaPorFrecuencia > 0">
+            <div class="pendiente-bar__fill pendiente-bar__fill--fin"
+              [style.width]="finProgresoPeriodo + '%'">
+            </div>
+          </div>
+          <a class="pendiente-card__link" routerLink="/finanzas">Ir a finanzas →</a>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── C: MÉTRICAS CLAVE ─────────────────────────────────────────────── -->
+    <section class="home-section">
+      <h2 class="home-section__title">Métricas clave</h2>
+      <div class="home-metricas">
+
+        <div class="metrica-card">
+          <span class="metrica-card__label">Días gym este año</span>
+          <span class="metrica-card__value">{{ gymDiasAnio }}</span>
+          <span class="metrica-card__sub">meta: {{ gymMetaAnual }} días</span>
+          <div class="metrica-bar">
+            <div class="metrica-bar__fill metrica-bar__fill--gym"
+              [style.width]="gymProgresoAnual + '%'"></div>
+          </div>
+          <span class="metrica-card__pct">{{ gymProgresoAnual }}%</span>
+        </div>
+
+        <div class="metrica-card">
+          <span class="metrica-card__label">Días gym este mes</span>
+          <span class="metrica-card__value">{{ gymDiasMes }}</span>
+          <span class="metrica-card__sub">meta: {{ gymMetaMensual }} días</span>
+          <div class="metrica-bar">
+            <div class="metrica-bar__fill metrica-bar__fill--gym"
+              [style.width]="(gymMetaMensual > 0 ? (gymDiasMes / gymMetaMensual * 100 | number:'1.0-0') : 0) + '%'">
+            </div>
+          </div>
+        </div>
+
+        <div class="metrica-card">
+          <span class="metrica-card__label">Ahorro total</span>
+          <span class="metrica-card__value">{{ formatMonto(finMontoAhorrado) }} COP</span>
+          <span class="metrica-card__sub">meta: {{ formatMonto(finMetaAnual) }} COP</span>
+          <div class="metrica-bar">
+            <div class="metrica-bar__fill metrica-bar__fill--fin"
+              [style.width]="finProgresoAnual + '%'"></div>
+          </div>
+          <span class="metrica-card__pct">{{ finProgresoAnual }}%</span>
+        </div>
+
+        <div class="metrica-card">
+          <span class="metrica-card__label">Saldo disponible</span>
+          <span class="metrica-card__value">{{ formatMonto(finSaldoDisponible) }} COP</span>
+        </div>
+
+      </div>
+    </section>
+
   </main>
 
   <app-footer />

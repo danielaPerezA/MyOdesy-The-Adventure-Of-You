@@ -10,69 +10,79 @@
         <span>RUTINAS DEL GIMNASIO</span>
       </div>
 
+      <!-- RACHA: N checkboxes según cantidad_dias_gym_semana -->
       <div class="gym-streak">
         <p class="gym-streak__title">Racha de entrenamiento</p>
-        <div class="gym-streak__calendar">
-          <div *ngFor="let d of weekDays" class="streak-col">
-            <span class="streak-day">{{ d }}</span>
-            <span class="circle" [class.active]="diasEntrenadosSemana[d]"></span>
+
+        <ng-container *ngIf="cantidadDiasGymSemana > 0; else sinMeta">
+          <div class="gym-streak__checks">
+            <div *ngFor="let i of getRange(cantidadDiasGymSemana)" class="streak-check-col">
+              <span class="streak-day-label">Día {{ i + 1 }}</span>
+              <span class="circle" [class.active]="diasGymChecks[i]"></span>
+            </div>
           </div>
-        </div>
+        </ng-container>
+        <ng-template #sinMeta>
+          <p class="streak-hint">Configura cuántos días irás al gym por semana para ver tu racha.</p>
+        </ng-template>
+
         <div class="gym-streak__counter">
           <span class="streak-number">{{ streakCount }}</span>
           <span class="streak-fire">🔥</span>
+          <span class="streak-label">semanas consecutivas</span>
         </div>
+        <p class="streak-best">Mayor racha: {{ mayorRacha }} semanas</p>
       </div>
 
-      <div class="gym-week">
-        <p class="gym-week__title">Días entrenados en la semana</p>
+      <!-- CHECKBOXES de registro diario -->
+      <div class="gym-week" *ngIf="cantidadDiasGymSemana > 0">
+        <p class="gym-week__title">¿Fuiste al gym esta semana?</p>
         <div class="gym-week__list">
-          <div class="week-row" *ngFor="let d of weekDays">
-            <span class="week-day">{{ d }}</span>
+          <div class="week-row" *ngFor="let i of getRange(cantidadDiasGymSemana)">
+            <span class="week-day">Día {{ i + 1 }}</span>
             <input type="checkbox"
-              [checked]="diasEntrenadosSemana[d]"
-              (change)="toggleDia(d, $event)"/>
-            <select [(ngModel)]="categoriasDia[d]" class="week-select">
+              [checked]="diasGymChecks[i]"
+              (change)="toggleGymCheck(i, $event)"/>
+            <select [(ngModel)]="categoriasDia[i]" class="week-select">
               <option value="" disabled>Categoría</option>
               <option *ngFor="let c of categorias" [value]="c">{{ c }}</option>
             </select>
           </div>
         </div>
+        <p class="week-progress" *ngIf="cantidadDiasGymSemana > 0">
+          {{ diasSemana }} / {{ cantidadDiasGymSemana }} días marcados esta semana
+        </p>
       </div>
 
       <div class="gym-forms">
         <div class="form-row">
-          <label>Editar Días entrenados esta semana</label>
-          <input type="number" [(ngModel)]="editDiasSemanaStr"
-            placeholder="Ingrese nuevo nro de días"/>
-          <button (click)="editarDiasSemana()">Editar</button>
+          <label>Días que planeas ir al gym por semana</label>
+          <input type="number" [(ngModel)]="editCantidadDiasStr"
+            placeholder="1 – 7" min="1" max="7"/>
+          <button (click)="configurarDiasGymSemana()">Configurar</button>
         </div>
 
         <div class="form-row">
-          <label>Editar Días entrenados este mes</label>
+          <label>Editar días entrenados este mes</label>
           <input type="number" [(ngModel)]="editDiasMesStr"
-            placeholder="Ingrese nuevo nro de días"/>
+            [placeholder]="'1 – ' + limitesMes"
+            min="1" [max]="limitesMes"/>
           <button (click)="editarDiasMes()">Editar</button>
         </div>
 
         <div class="form-row">
-          <label>Editar meta semanal</label>
-          <input type="number" [(ngModel)]="editMetaSemanalStr"
-            placeholder="Ingrese nueva meta semanal"/>
-          <button (click)="editarMetaSemanal()">Editar</button>
-        </div>
-
-        <div class="form-row">
-          <label>Editar meta mensual</label>
+          <label>Editar meta mensual (días)</label>
           <input type="number" [(ngModel)]="editMetaMensualStr"
-            placeholder="Ingrese nueva meta mensual"/>
+            [placeholder]="'1 – ' + limitesMes"
+            min="1" [max]="limitesMes"/>
           <button (click)="editarMetaMensual()">Editar</button>
         </div>
 
         <div class="form-row">
-          <label>Editar meta anual</label>
+          <label>Editar meta anual (días)</label>
           <input type="number" [(ngModel)]="editMetaAnualStr"
-            placeholder="Ingrese nueva meta anual"/>
+            [placeholder]="'1 – ' + limitesAnio"
+            min="1" [max]="limitesAnio"/>
           <button (click)="editarMetaAnual()">Editar</button>
         </div>
       </div>
@@ -83,11 +93,7 @@
       <div class="gym-stats">
         <div class="stat-card">
           <span class="stat-card__label">Días entrenados esta semana</span>
-          <span class="stat-card__value">{{ diasSemana }}</span>
-        </div>
-        <div class="stat-card">
-          <span class="stat-card__label">Meta de días a la semana</span>
-          <span class="stat-card__value">{{ metaSemanal }}</span>
+          <span class="stat-card__value">{{ diasSemana }} / {{ cantidadDiasGymSemana }}</span>
         </div>
         <div class="stat-card">
           <span class="stat-card__label">Días entrenados este mes</span>
@@ -104,6 +110,10 @@
         <div class="stat-card">
           <span class="stat-card__label">Meta de días al año</span>
           <span class="stat-card__value">{{ metaAnual }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Mayor racha</span>
+          <span class="stat-card__value">{{ mayorRacha }} 🔥</span>
         </div>
       </div>
 

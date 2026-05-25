@@ -24,12 +24,15 @@
   width: 48%;
 }
 
+// ── Encabezado ────────────────────────────────────────────────────────────
+
 .gym-header {
-  background-color: var(--cream-dark);
+  background-color: var(--card-bg);
   border: 1.5px solid var(--card-border);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 20px 28px;
   text-align: center;
+  box-shadow: var(--shadow-card);
 
   p {
     font-family: var(--letra);
@@ -45,17 +48,20 @@
 
   span {
     font-family: var(--letra);
-    font-size: 12px;
+    font-size: 11px;
     color: var(--brown);
     letter-spacing: 4px;
   }
 }
 
+// ── Racha ─────────────────────────────────────────────────────────────────
+
 .gym-streak {
-  background-color: var(--section-bg);
+  background-color: var(--card-bg);
   border: 1.5px solid var(--card-border);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 24px;
+  box-shadow: var(--shadow-card);
 
   &__title {
     font-family: var(--letra);
@@ -66,9 +72,11 @@
     letter-spacing: 1px;
   }
 
-  &__calendar {
+  &__checks {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
     margin-bottom: 20px;
   }
 
@@ -76,56 +84,37 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 12px 0 4px;
+    gap: 10px;
+    padding: 14px 0 4px;
     border-top: 1px solid var(--divider);
     margin-top: 8px;
   }
 }
 
-.streak-col {
+.streak-check-col {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
-.streak-day {
-  font-family: var(--letra);
+.streak-day-label {
+  font-family: var(--font-body);
   font-size: 10px;
+  font-weight: 700;
   color: var(--brown);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
-.circle {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 1.5px solid var(--brown);
-  background-color: transparent;
-  flex-shrink: 0;
-
-  &.active {
-    background-color: var(--brown);
-  }
-}
-
-.streak-number {
-  font-family: var(--letra);
-  font-size: 48px;
-  font-weight: bold;
-  color: var(--brown-deep);
-  line-height: 1;
-}
-
-.streak-fire {
-  font-size: 36px;
-}
+// ── Lista semanal ─────────────────────────────────────────────────────────
 
 .gym-week {
-  background-color: var(--section-bg);
+  background-color: var(--card-bg);
   border: 1.5px solid var(--card-border);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 20px 24px;
+  box-shadow: var(--shadow-card);
 
   &__title {
     font-family: var(--letra);
@@ -153,88 +142,63 @@
     accent-color: var(--brown);
     cursor: pointer;
     flex-shrink: 0;
+    transition: transform 0.15s ease;
+
+    &:checked { transform: scale(1.15); }
   }
 }
 
 .week-day {
-  font-family: var(--letra);
+  font-family: var(--font-body);
   font-size: 12px;
+  font-weight: 700;
   color: var(--brown-deep);
-  min-width: 36px;
-  letter-spacing: 1px;
+  min-width: 44px;
+  letter-spacing: 0.5px;
+}
+
+.week-progress {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--brown);
+  text-align: right;
+  margin-top: 10px;
+  font-style: italic;
 }
 
 .week-select {
   flex: 1;
   background-color: var(--input-bg);
-  border: 1px solid var(--brown-light);
-  border-radius: 20px;
-  padding: 5px 14px;
-  font-family: var(--letra);
-  font-size: 11px;
+  border: 1.5px solid var(--brown-light);
+  border-radius: var(--radius-pill);
+  padding: 6px 14px;
+  font-family: var(--font-body);
+  font-size: 12px;
   color: var(--brown-deep);
   outline: none;
   cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
-  &:focus { border-color: var(--brown); }
+  &:focus {
+    border-color: var(--brown);
+    box-shadow: 0 0 0 3px rgba(139, 99, 67, 0.15);
+  }
 }
 
+// ── Formularios ───────────────────────────────────────────────────────────
+
 .gym-forms {
-  background-color: var(--section-bg);
+  background-color: var(--card-bg);
   border: 1.5px solid var(--card-border);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 24px;
+  box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.form-row {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-
-  label {
-    font-family: var(--letra);
-    font-size: 12px;
-    color: var(--brown-deep);
-    letter-spacing: 1px;
-  }
-
-  input {
-    background-color: var(--input-bg);
-    border: 1px solid var(--brown-light);
-    border-radius: 20px;
-    padding: 8px 18px;
-    font-family: var(--letra);
-    font-size: 12px;
-    color: var(--brown-deep);
-    outline: none;
-    width: 100%;
-
-    &::placeholder { color: var(--brown-light); }
-    &:focus { border-color: var(--brown); }
-  }
-
-  button {
-    align-self: flex-end;
-    background-color: var(--brown);
-    border: none;
-    border-radius: 20px;
-    padding: 6px 20px;
-    font-family: var(--letra);
-    font-size: 12px;
-    color: var(--off-white);
-    cursor: pointer;
-    letter-spacing: 1px;
-    transition: transform 0.2s ease, background-color 0.2s ease;
-
-    &:hover {
-      background-color: var(--brown-dark);
-      transform: scale(1.05);
-    }
-  }
-}
+// ── Panel derecho ─────────────────────────────────────────────────────────
 
 .gym-right {
   display: flex;
@@ -249,40 +213,14 @@
   gap: 14px;
 }
 
-.stat-card {
-  background-color: var(--section-bg);
-  border: 1.5px solid var(--card-border);
-  border-radius: 12px;
-  padding: 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  transition: transform 0.2s ease;
-
-  &:hover { transform: translateY(-3px); }
-
-  &__label {
-    font-family: var(--letra);
-    font-size: 11px;
-    color: var(--brown);
-    letter-spacing: 1px;
-    text-align: center;
-  }
-
-  &__value {
-    font-family: var(--letra);
-    font-size: 22px;
-    font-weight: bold;
-    color: var(--brown-deep);
-    text-align: center;
-  }
-}
+// ── Progreso mensual ──────────────────────────────────────────────────────
 
 .gym-progress {
-  background-color: var(--section-bg);
+  background-color: var(--card-bg);
   border: 1.5px solid var(--card-border);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 20px 24px;
+  box-shadow: var(--shadow-card);
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -297,94 +235,14 @@
   }
 }
 
-.progress-list {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  justify-content: space-between;
-}
-
-.progress-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-
-  &__month {
-    font-family: var(--letra);
-    font-size: 12px;
-    color: var(--brown);
-    min-width: 28px;
-    text-align: right;
-    padding-top: 6px;
-  }
-
-  &__track {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  &__bar {
-    height: 22px;
-    background-color: var(--bar-track);
-    border-radius: 11px;
-    overflow: hidden;
-    width: 100%;
-  }
-
-  &__fill {
-    height: 100%;
-    background-color: var(--brown);
-    border-radius: 11px;
-    display: flex;
-    align-items: center;
-    padding-left: 10px;
-    min-width: 0;
-    transition: width 0.6s ease;
-
-    span {
-      font-family: var(--letra);
-      font-size: 11px;
-      color: var(--off-white);
-      font-weight: bold;
-      white-space: nowrap;
-    }
-  }
-}
-
-.progress-item__cat {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  background-color: var(--cat-bg);
-  border-radius: 20px;
-  width: fit-content;
-  margin-top: 2px;
-
-  .cat-emoji { font-size: 12px; }
-
-  .cat-label {
-    font-family: var(--letra);
-    font-size: 10px;
-    color: var(--brown);
-    opacity: 0.8;
-  }
-
-  .cat-value {
-    font-family: var(--letra);
-    font-size: 11px;
-    color: var(--brown-dark);
-    font-weight: bold;
-  }
-}
+// ── Meta anual ────────────────────────────────────────────────────────────
 
 .gym-annual {
-  background-color: var(--section-bg);
+  background-color: var(--card-bg);
   border: 1.5px solid var(--card-border);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   padding: 20px 24px;
+  box-shadow: var(--shadow-card);
 
   &__header {
     display: flex;
@@ -401,8 +259,9 @@
   }
 
   &__values {
-    font-family: var(--letra);
+    font-family: var(--font-body);
     font-size: 12px;
+    font-weight: 700;
     color: var(--brown);
   }
 
@@ -424,13 +283,15 @@
     justify-content: flex-end;
     padding-right: 12px;
     min-width: 0;
+    transform-origin: left center;
     transition: width 0.8s ease;
+    animation: barGrow 1s cubic-bezier(0.22, 1, 0.36, 1) both;
 
     span {
-      font-family: var(--letra);
-      font-size: 13px;
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 700;
       color: var(--off-white);
-      font-weight: bold;
     }
   }
 
@@ -441,16 +302,16 @@
   }
 
   &__label {
-    font-family: var(--letra);
+    font-family: var(--font-body);
     font-size: 11px;
     color: var(--brown);
     opacity: 0.8;
   }
 
   &__percent {
-    font-family: var(--letra);
+    font-family: var(--font-body);
     font-size: 13px;
-    font-weight: bold;
+    font-weight: 700;
     color: var(--brown-deep);
   }
 }

@@ -1,30 +1,46 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400;700;900&display=swap');
 
 :root {
-    --cream: #f5ede0;
-    --fondo: #F1E6DF;
-    --borde: #593325;
-    --letra: Miltonian Tattoo;
-    --cream-dark: #e8d9c5;
-    --brown-light: #b8896a;
-    --brown: #8b6343;
-    --brown-dark: #5c3d1e;
-    --brown-deep: #3b2410;
-    --brown-background-nav-foot: #b08060;
+  // Paleta
+  --cream:       #f5ede0;
+  --fondo:       #F1E6DF;
+  --borde:       #593325;
+  --cream-dark:  #e8d9c5;
+  --brown-light: #b8896a;
+  --brown:       #8b6343;
+  --brown-dark:  #5c3d1e;
+  --brown-deep:  #3b2410;
+  --brown-background-nav-foot: #b08060;
 
-    --off-white: #fdfaf6;
-    --shadow: rgba(59, 36, 16, 0.15);
-    --shadow-md: rgba(59, 36, 16, 0.25);
-    --card-bg: #d4b896;
-    --card-header-bg: #7a5535;
-    --card-border: rgba(139, 99, 67, 0.5);
+  --off-white:   #fdfaf6;
+  --success:     #4a7a35;
+  --error:       #c0392b;
 
-    --section-bg: rgba(196, 168, 130, 0.55);
-    --input-bg: rgba(245, 237, 224, 0.6);
-    --bar-track: rgba(245, 237, 224, 0.8);
-    --btn-bg: rgba(245, 237, 224, 0.7);
-    --divider: rgba(139, 99, 67, 0.2);
-    --cat-bg: rgba(139, 99, 67, 0.15);
-    --error: #c0392b;
-    --success: #4a7a35;
+  // Tipografía
+  --letra:      'Miltonian Tattoo', cursive;  // solo títulos decorativos
+  --font-body:  'Lato', sans-serif;           // valores, números, body
+
+  // Cards — más opacas para legibilidad sobre la imagen de fondo
+  --card-bg:         rgba(245, 237, 224, 0.88);
+  --card-header-bg:  #7a5535;
+  --card-border:     rgba(139, 99, 67, 0.35);
+
+  // Secciones y elementos secundarios
+  --section-bg:  rgba(245, 237, 224, 0.80);
+  --input-bg:    rgba(255, 255, 255, 0.82);   // inputs blancos → más legibles
+  --bar-track:   rgba(196, 168, 130, 0.35);
+  --btn-bg:      rgba(245, 237, 224, 0.85);
+  --divider:     rgba(139, 99, 67, 0.2);
+  --cat-bg:      rgba(139, 99, 67, 0.12);
+
+  // Sombras de doble capa (borde nítido + difusa)
+  --shadow-card:  0 2px 4px rgba(59,36,16,0.08), 0 8px 20px rgba(59,36,16,0.13);
+  --shadow-hover: 0 4px 8px rgba(59,36,16,0.12), 0 18px 36px rgba(59,36,16,0.18);
+  --shadow-sm:    0 1px 3px rgba(59,36,16,0.1);
+  --shadow-md:    rgba(59, 36, 16, 0.25);
+
+  // Radio de borde unificado
+  --radius-card: 16px;
+  --radius-pill: 24px;
+  --radius-sm:   8px;
 }

@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Navbar } from '../../components/navbar/navbar';
 import { Footer } from '../../components/footer/footer';
+import { GymService } from '../../services/gym/gym';
+import { AuthService } from '../../services/my-odesy';
+import { GymGoalDto } from '../../core/models/api.models';
 
 @Component({
   selector: 'app-gym',
@@ -14,30 +17,33 @@ import { Footer } from '../../components/footer/footer';
 export class Gym implements OnInit {
   username = '';
 
+  // ID de la meta en la BD (null si aún no existe)
+  private gymGoalId: number | null = null;
+  private userId = 0;
+
+  // Configuración de la meta
+  cantidadDiasGymSemana = 0;
+  metaMensual = 0;
+  metaAnual = 0;
+
+  // Contadores acumulados
   diasSemana = 0;
   diasMes = 0;
   diasAnio = 0;
-  metaSemanal = 0;
-  metaMensual = 0;
-  metaAnual = 0;
-  streakCount = 0;
 
-  weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  // Rachas
+  streakCount = 0;
+  mayorRacha = 0;
+
+  // Checkboxes dinámicos: longitud = cantidadDiasGymSemana
+  diasGymChecks: boolean[] = [];
+  categoriasDia: string[] = [];
+
   categorias = ['Pecho', 'Espalda', 'Piernas', 'Hombros', 'Brazos', 'Cardio', 'Full Body'];
 
-  diasEntrenadosSemana: {[key: string]: boolean} = {
-    Mon: false, Tue: false, Wed: false, Thu: false,
-    Fri: false, Sat: false, Sun: false
-  };
-
-  categoriasDia: {[key: string]: string} = {
-    Mon: '', Tue: '', Wed: '', Thu: '',
-    Fri: '', Sat: '', Sun: ''
-  };
-
-  editDiasSemanaStr = '';
+  // Strings para formularios de edición
+  editCantidadDiasStr = '';
   editDiasMesStr = '';
-  editMetaSemanalStr = '';
   editMetaMensualStr = '';
   editMetaAnualStr = '';
 
@@ -56,30 +62,46 @@ export class Gym implements OnInit {
     { mes: 'Dic', porcentaje: 0, categoria: '-' },
   ];
 
+  constructor(
+    private gymService: GymService,
+    private authService: AuthService
+  ) {}
+
   ngOnInit() {
-    const usuario = JSON.parse(localStorage.getItem('UsuarioLogueado') || '{}');
-    const perfil = JSON.parse(localStorage.getItem('perfilUsuario') || '{}');
-    this.username = perfil.usuario || perfil.nombre || usuario.name || 'Usuario';
+    // Datos de sesión
+    const session = this.authService.currentUser();
+    this.userId = session?.userId ?? 0;
+    this.username = session?.firstName || session?.username || 'Usuario';
 
-    if (perfil.metaGymSemanal) this.metaSemanal = perfil.metaGymSemanal;
-    if (perfil.metaGymMensual) this.metaMensual = perfil.metaGymMensual;
+    // Cargar estado local (cache offline / contadores de progreso)
+    this.cargarDesdeLocalStorage();
 
-    const gym = JSON.parse(localStorage.getItem('datosGym') || '{}');
-    if (gym.diasSemana !== undefined) this.diasSemana = gym.diasSemana;
-    if (gym.diasMes !== undefined) this.diasMes = gym.diasMes;
-    if (gym.diasAnio !== undefined) this.diasAnio = gym.diasAnio;
-    if (gym.metaSemanal !== undefined) this.metaSemanal = gym.metaSemanal;
-    if (gym.metaMensual !== undefined) this.metaMensual = gym.metaMensual;
-    if (gym.metaAnual !== undefined) this.metaAnual = gym.metaAnual;
-    if (gym.streakCount !== undefined) this.streakCount = gym.streakCount;
-    if (gym.diasEntrenadosSemana) this.diasEntrenadosSemana = gym.diasEntrenadosSemana;
-    if (gym.categoriasDia) this.categoriasDia = gym.categoriasDia;
-
-    const progreso = localStorage.getItem('progresoGym');
-    if (progreso) this.progresoMensual = JSON.parse(progreso);
+    // Cargar meta desde la API
+    if (this.userId) {
+      this.gymService.getByUserId(this.userId).subscribe(goal => {
+        if (goal) {
+          this.gymGoalId = goal.gymGoalId ?? null;
+          this.cantidadDiasGymSemana = goal.weeklyGymDays ?? 0;
+          // Reconstruir checkboxes si no hay estado local
+          const gym = JSON.parse(localStorage.getItem('datosGym') || '{}');
+          if (!gym.diasGymChecks) this.initCheckboxes();
+        }
+      });
+    }
 
     this.verificarNuevaSemana();
     this.verificarNuevoMes();
+  }
+
+  // ── Utilidades ────────────────────────────────────────────────────────────
+
+  getRange(n: number): number[] {
+    return Array.from({ length: n }, (_, i) => i);
+  }
+
+  private initCheckboxes() {
+    this.diasGymChecks = Array(this.cantidadDiasGymSemana).fill(false);
+    this.categoriasDia = Array(this.cantidadDiasGymSemana).fill('');
   }
 
   private getSemanaAnio(): number {
@@ -94,21 +116,90 @@ export class Gym implements OnInit {
     return `${ahora.getFullYear()}-${ahora.getMonth()}`;
   }
 
+  get limitesMes(): number {
+    const ahora = new Date();
+    return new Date(ahora.getFullYear(), ahora.getMonth() + 1, 0).getDate();
+  }
+
+  get limitesAnio(): number {
+    const anio = new Date().getFullYear();
+    return (anio % 4 === 0 && (anio % 100 !== 0 || anio % 400 === 0)) ? 366 : 365;
+  }
+
+  // ── Carga y guardado ──────────────────────────────────────────────────────
+
+  private cargarDesdeLocalStorage() {
+    const gym = JSON.parse(localStorage.getItem('datosGym') || '{}');
+    if (gym.cantidadDiasGymSemana !== undefined) this.cantidadDiasGymSemana = gym.cantidadDiasGymSemana;
+    if (gym.diasMes !== undefined)    this.diasMes    = gym.diasMes;
+    if (gym.diasAnio !== undefined)   this.diasAnio   = gym.diasAnio;
+    if (gym.metaMensual !== undefined) this.metaMensual = gym.metaMensual;
+    if (gym.metaAnual !== undefined)  this.metaAnual  = gym.metaAnual;
+    if (gym.streakCount !== undefined) this.streakCount = gym.streakCount;
+    if (gym.mayorRacha !== undefined) this.mayorRacha = gym.mayorRacha;
+    this.diasGymChecks = gym.diasGymChecks || [];
+    this.categoriasDia = gym.categoriasDia || Array(this.cantidadDiasGymSemana).fill('');
+
+    const progreso = localStorage.getItem('progresoGym');
+    if (progreso) this.progresoMensual = JSON.parse(progreso);
+
+    this.diasSemana = this.diasGymChecks.filter(c => c).length;
+  }
+
+  guardarGym() {
+    localStorage.setItem('datosGym', JSON.stringify({
+      cantidadDiasGymSemana: this.cantidadDiasGymSemana,
+      diasSemana: this.diasSemana,
+      diasMes: this.diasMes,
+      diasAnio: this.diasAnio,
+      metaMensual: this.metaMensual,
+      metaAnual: this.metaAnual,
+      streakCount: this.streakCount,
+      mayorRacha: this.mayorRacha,
+      diasGymChecks: this.diasGymChecks,
+      categoriasDia: this.categoriasDia,
+    }));
+  }
+
+  /** Construye el DTO para enviar a la API. */
+  private buildDto(): GymGoalDto {
+    return {
+      gymGoalId: this.gymGoalId ?? undefined,
+      userId: this.userId,
+      categoryId: 1,                              // categoría general por defecto
+      weeklyGymDays: this.cantidadDiasGymSemana,
+      targetDaysPerWeek: this.cantidadDiasGymSemana,
+      activeGoal: true,
+    };
+  }
+
+  /** Sincroniza la meta con la API y guarda el ID devuelto. */
+  private sincronizarMeta() {
+    if (!this.userId) return;
+    this.gymService.createOrUpdate(this.buildDto()).subscribe(saved => {
+      this.gymGoalId = saved.gymGoalId ?? this.gymGoalId;
+    });
+  }
+
+  // ── Verificaciones de período ──────────────────────────────────────────────
+
   private verificarNuevaSemana() {
     const semanaActual = this.getSemanaAnio().toString();
     const semanaGuardada = localStorage.getItem('semanaGym');
 
     if (semanaGuardada !== semanaActual) {
+      const claveRachaAnterior = `racha-gym-semana-${semanaGuardada}`;
+      const ultimaRacha = localStorage.getItem('ultimaRachaGymSemana');
+
+      if (semanaGuardada && ultimaRacha !== claveRachaAnterior && this.cantidadDiasGymSemana > 0) {
+        if (!this.diasGymChecks.every(c => c)) {
+          this.streakCount = 0;
+        }
+      }
+
       this.actualizarProgresoMes();
       this.diasSemana = 0;
-      this.diasEntrenadosSemana = {
-        Mon: false, Tue: false, Wed: false, Thu: false,
-        Fri: false, Sat: false, Sun: false
-      };
-      this.categoriasDia = {
-        Mon: '', Tue: '', Wed: '', Thu: '',
-        Fri: '', Sat: '', Sun: ''
-      };
+      this.initCheckboxes();
       localStorage.setItem('semanaGym', semanaActual);
       this.guardarGym();
     }
@@ -128,71 +219,39 @@ export class Gym implements OnInit {
 
   private actualizarProgresoMesAnterior(mesGuardado: string | null) {
     if (!mesGuardado) return;
-
-    const [anio, mes] = mesGuardado.split('-').map(Number);
-    const mesesEs: {[key: number]: string} = {
+    const [, mes] = mesGuardado.split('-').map(Number);
+    const mesesEs: { [key: number]: string } = {
       0: 'Jan', 1: 'Feb', 2: 'Mar', 3: 'Apr',
       4: 'May', 5: 'Jun', 6: 'Jul', 7: 'Aug',
       8: 'Sep', 9: 'Oct', 10: 'Nov', 11: 'Dic'
     };
     const nombreMes = mesesEs[mes];
     const idx = this.progresoMensual.findIndex(p => p.mes === nombreMes);
-
     if (idx !== -1 && this.metaMensual > 0) {
       this.progresoMensual[idx].porcentaje = Math.min(
-        Math.round((this.diasMes / this.metaMensual) * 100),
-        100
+        Math.round((this.diasMes / this.metaMensual) * 100), 100
       );
     }
     localStorage.setItem('progresoGym', JSON.stringify(this.progresoMensual));
   }
 
-  private numeroValido(valor: string): boolean {
-    return parseInt(valor) > 0;
-  }
-
-  private yaRegistroHoy(): boolean {
-    const hoy = new Date().toDateString();
-    const ultimaRacha = localStorage.getItem('ultimaRachaGym');
-    return ultimaRacha === hoy;
-  }
-
-  private marcarRachaHoy() {
-    localStorage.setItem('ultimaRachaGym', new Date().toDateString());
-  }
-
-  guardarGym() {
-    localStorage.setItem('datosGym', JSON.stringify({
-      diasSemana: this.diasSemana,
-      diasMes: this.diasMes,
-      diasAnio: this.diasAnio,
-      metaSemanal: this.metaSemanal,
-      metaMensual: this.metaMensual,
-      metaAnual: this.metaAnual,
-      streakCount: this.streakCount,
-      diasEntrenadosSemana: this.diasEntrenadosSemana,
-      categoriasDia: this.categoriasDia,
-    }));
-  }
+  // ── Progreso ──────────────────────────────────────────────────────────────
 
   actualizarProgresoMes() {
-    const mesesEs: {[key: number]: string} = {
+    const mesesEs: { [key: number]: string } = {
       0: 'Jan', 1: 'Feb', 2: 'Mar', 3: 'Apr',
       4: 'May', 5: 'Jun', 6: 'Jul', 7: 'Aug',
       8: 'Sep', 9: 'Oct', 10: 'Nov', 11: 'Dic'
     };
     const mesActual = mesesEs[new Date().getMonth()];
     const idx = this.progresoMensual.findIndex(p => p.mes === mesActual);
-
     if (idx !== -1 && this.metaMensual > 0) {
       this.progresoMensual[idx].porcentaje = Math.min(
-        Math.round((this.diasMes / this.metaMensual) * 100),
-        100
+        Math.round((this.diasMes / this.metaMensual) * 100), 100
       );
-
-      const cats = Object.values(this.categoriasDia).filter(c => c !== '');
+      const cats = this.categoriasDia.filter(c => c !== '');
       if (cats.length > 0) {
-        const freq: {[key: string]: number} = {};
+        const freq: { [key: string]: number } = {};
         cats.forEach(c => freq[c] = (freq[c] || 0) + 1);
         this.progresoMensual[idx].categoria = Object.entries(freq)
           .sort((a, b) => b[1] - a[1])[0][0];
@@ -206,86 +265,87 @@ export class Gym implements OnInit {
     return Math.min(Math.round((this.diasAnio / this.metaAnual) * 100), 100);
   }
 
-  toggleDia(dia: string, event: any) {
+  // ── Interacciones del usuario ─────────────────────────────────────────────
+
+  toggleGymCheck(index: number, event: any) {
     const checked = event.target.checked;
-    this.diasEntrenadosSemana[dia] = checked;
+    this.diasGymChecks[index] = checked;
 
     if (checked) {
       this.diasSemana++;
       this.diasMes++;
       this.diasAnio++;
-
-      if (!this.yaRegistroHoy()) {
-        this.streakCount++;
-        this.marcarRachaHoy();
-      }
     } else {
       this.diasSemana = Math.max(0, this.diasSemana - 1);
       this.diasMes = Math.max(0, this.diasMes - 1);
       this.diasAnio = Math.max(0, this.diasAnio - 1);
     }
 
+    const todosCompletados = this.cantidadDiasGymSemana > 0 && this.diasGymChecks.every(c => c);
+    const claveRacha = `racha-gym-semana-${this.getSemanaAnio()}`;
+    const ultimaRacha = localStorage.getItem('ultimaRachaGymSemana');
+
+    if (todosCompletados && ultimaRacha !== claveRacha) {
+      this.streakCount++;
+      if (this.streakCount > this.mayorRacha) this.mayorRacha = this.streakCount;
+      localStorage.setItem('ultimaRachaGymSemana', claveRacha);
+    }
+
     this.actualizarProgresoMes();
     this.guardarGym();
   }
 
-  editarDiasSemana() {
-    if (!this.numeroValido(this.editDiasSemanaStr)) {
-      alert('Por favor ingresa un número válido mayor a 0.');
+  configurarDiasGymSemana() {
+    const n = parseInt(this.editCantidadDiasStr);
+    if (!n || n <= 0 || n > 7) {
+      alert('Ingresa un número válido entre 1 y 7.');
       return;
     }
-    this.diasSemana = parseInt(this.editDiasSemanaStr);
-    this.editDiasSemanaStr = '';
+    this.cantidadDiasGymSemana = n;
+    this.initCheckboxes();
+    this.diasSemana = 0;
+    this.editCantidadDiasStr = '';
     this.guardarGym();
+    this.sincronizarMeta();   // ← API call
   }
 
   editarDiasMes() {
-    if (!this.numeroValido(this.editDiasMesStr)) {
-      alert('Por favor ingresa un número válido mayor a 0.');
+    const n = parseInt(this.editDiasMesStr);
+    const max = this.limitesMes;
+    if (!n || n <= 0 || n > max) {
+      alert(`Ingresa un número entre 1 y ${max} (días del mes actual).`);
       return;
     }
-    this.diasMes = parseInt(this.editDiasMesStr);
+    this.diasMes = n;
     this.editDiasMesStr = '';
     this.actualizarProgresoMes();
     this.guardarGym();
   }
 
-  editarMetaSemanal() {
-    if (!this.numeroValido(this.editMetaSemanalStr)) {
-      alert('Por favor ingresa un número válido mayor a 0.');
-      return;
-    }
-    this.metaSemanal = parseInt(this.editMetaSemanalStr);
-    this.editMetaSemanalStr = '';
-
-    const perfil = JSON.parse(localStorage.getItem('perfilUsuario') || '{}');
-    perfil.metaGymSemanal = this.metaSemanal;
-    localStorage.setItem('perfilUsuario', JSON.stringify(perfil));
-    this.guardarGym();
-  }
-
   editarMetaMensual() {
-    if (!this.numeroValido(this.editMetaMensualStr)) {
-      alert('Por favor ingresa un número válido mayor a 0.');
+    const n = parseInt(this.editMetaMensualStr);
+    const max = this.limitesMes;
+    if (!n || n <= 0 || n > max) {
+      alert(`Ingresa un número entre 1 y ${max} (días del mes actual).`);
       return;
     }
-    this.metaMensual = parseInt(this.editMetaMensualStr);
+    this.metaMensual = n;
     this.editMetaMensualStr = '';
     this.actualizarProgresoMes();
-
-    const perfil = JSON.parse(localStorage.getItem('perfilUsuario') || '{}');
-    perfil.metaGymMensual = this.metaMensual;
-    localStorage.setItem('perfilUsuario', JSON.stringify(perfil));
     this.guardarGym();
+    this.sincronizarMeta();   // ← API call
   }
 
   editarMetaAnual() {
-    if (!this.numeroValido(this.editMetaAnualStr)) {
-      alert('Por favor ingresa un número válido mayor a 0.');
+    const n = parseInt(this.editMetaAnualStr);
+    const max = this.limitesAnio;
+    if (!n || n <= 0 || n > max) {
+      alert(`Ingresa un número entre 1 y ${max} (días del año actual).`);
       return;
     }
-    this.metaAnual = parseInt(this.editMetaAnualStr);
+    this.metaAnual = n;
     this.editMetaAnualStr = '';
     this.guardarGym();
+    this.sincronizarMeta();   // ← API call
   }
 }
