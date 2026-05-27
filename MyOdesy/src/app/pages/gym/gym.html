@@ -10,20 +10,20 @@
         <span>RUTINAS DEL GIMNASIO</span>
       </div>
 
-      <!-- RACHA: N checkboxes según cantidad_dias_gym_semana -->
+      <!-- RACHA: círculos por día configurado -->
       <div class="gym-streak">
         <p class="gym-streak__title">Racha de entrenamiento</p>
 
-        <ng-container *ngIf="cantidadDiasGymSemana > 0; else sinMeta">
+        <ng-container *ngIf="diasConfigurados.length > 0; else sinMeta">
           <div class="gym-streak__checks">
-            <div *ngFor="let i of getRange(cantidadDiasGymSemana)" class="streak-check-col">
-              <span class="streak-day-label">Día {{ i + 1 }}</span>
-              <span class="circle" [class.active]="diasGymChecks[i]"></span>
+            <div *ngFor="let dia of diasConfigurados" class="streak-check-col">
+              <span class="streak-day-label">{{ DIAS_LABELS[dia] }}</span>
+              <span class="circle" [class.active]="isDiaMarcado(dia)"></span>
             </div>
           </div>
         </ng-container>
         <ng-template #sinMeta>
-          <p class="streak-hint">Configura cuántos días irás al gym por semana para ver tu racha.</p>
+          <p class="streak-hint">Configura los días que irás al gym para ver tu racha.</p>
         </ng-template>
 
         <div class="gym-streak__counter">
@@ -34,16 +34,17 @@
         <p class="streak-best">Mayor racha: {{ mayorRacha }} semanas</p>
       </div>
 
-      <!-- CHECKBOXES de registro diario -->
-      <div class="gym-week" *ngIf="cantidadDiasGymSemana > 0">
+      <!-- CHECKBOXES de registro diario: solo días configurados -->
+      <div class="gym-week" *ngIf="diasConfigurados.length > 0">
         <p class="gym-week__title">¿Fuiste al gym esta semana?</p>
         <div class="gym-week__list">
-          <div class="week-row" *ngFor="let i of getRange(cantidadDiasGymSemana)">
-            <span class="week-day">Día {{ i + 1 }}</span>
+          <div class="week-row" *ngFor="let dia of diasConfigurados">
+            <span class="week-day">{{ DIAS_LABELS[dia] }}</span>
             <input type="checkbox"
-              [checked]="diasGymChecks[i]"
-              (change)="toggleGymCheck(i, $event)"/>
-            <select [(ngModel)]="categoriasDia[i]" class="week-select">
+              [checked]="isDiaMarcado(dia)"
+              [disabled]="isDiaMarcado(dia)"
+              (change)="toggleGymCheck(dia)"/>
+            <select [(ngModel)]="categoriasDia[dia]" class="week-select">
               <option value="" disabled>Categoría</option>
               <option *ngFor="let c of categorias" [value]="c">{{ c }}</option>
             </select>
@@ -55,12 +56,23 @@
       </div>
 
       <div class="gym-forms">
+
+        <!-- Selector de días de semana -->
         <div class="form-row">
-          <label>Días que planeas ir al gym por semana</label>
-          <input type="number" [(ngModel)]="editCantidadDiasStr"
-            placeholder="1 – 7" min="1" max="7"/>
-          <button (click)="configurarDiasGymSemana()">Configurar</button>
+          <label>Días que irás al gym</label>
+          <div class="day-picker">
+            <button *ngFor="let dia of DIAS_SEMANA"
+              type="button"
+              class="day-btn"
+              [class.active]="isDiaSeleccionado(dia)"
+              (click)="toggleDiaSeleccion(dia)">
+              {{ DIAS_LABELS[dia] }}
+            </button>
+          </div>
+          <button (click)="configurarDiasGymSemana()">Guardar días</button>
         </div>
+
+        <div class="form-divider"></div>
 
         <div class="form-row">
           <label>Editar días entrenados este mes</label>

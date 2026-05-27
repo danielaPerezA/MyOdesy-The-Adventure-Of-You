@@ -42,7 +42,7 @@ export class Home implements OnInit {
   finMetaPorFrecuencia = 0;
   finCantidadFrecuencias = 0;
   finSaldoDisponible = 0;
-  finFrecuencia: 'semanal' | 'mensual' = 'mensual';
+  finFrecuencia: 'SEMANAL' | 'MENSUAL' = 'MENSUAL';
 
   // ── Alertas ───────────────────────────────────────────────────────────────
   alertas: Alerta[] = [];
@@ -60,7 +60,9 @@ export class Home implements OnInit {
     this.gymStreakCount           = gym.streakCount           ?? 0;
     this.gymMayorRacha            = gym.mayorRacha            ?? 0;
     this.gymDiasSemana            = gym.diasSemana            ?? 0;
-    this.gymCantidadDiasGymSemana = gym.cantidadDiasGymSemana ?? 0;
+    // cantidadDiasGymSemana puede venir del API (cacheado) o derivarse de diasSeleccionados
+    this.gymCantidadDiasGymSemana = gym.cantidadDiasGymSemana
+      ?? (Array.isArray(gym.diasSeleccionados) ? gym.diasSeleccionados.length : 0);
     this.gymDiasAnio              = gym.diasAnio              ?? 0;
     this.gymMetaAnual             = gym.metaAnual             ?? 0;
     this.gymDiasMes               = gym.diasMes               ?? 0;
@@ -68,15 +70,15 @@ export class Home implements OnInit {
 
     // Finanzas
     const fin = JSON.parse(localStorage.getItem('datosFinanzas') || '{}');
-    this.finStreakCount            = fin.streakCount              ?? 0;
-    this.finMayorRacha             = fin.mayorRacha               ?? 0;
-    this.finMontoAhorrado          = fin.montoAhorrado            ?? 0;
-    this.finMetaAnual              = fin.metaAhorroAnual          ?? perfil.metaAhorroAnual ?? 0;
-    this.finAhorroFrecuenciaActual = fin.ahorroFrecuenciaActual   ?? 0;
+    this.finStreakCount            = fin.streakCount                ?? 0;
+    this.finMayorRacha             = fin.mayorRacha                 ?? 0;
+    this.finMontoAhorrado          = fin.montoAhorrado              ?? 0;
+    this.finMetaAnual              = perfil.metaAhorroAnual         ?? 0;
+    this.finAhorroFrecuenciaActual = fin.ahorroFrecuenciaActual     ?? 0;
     this.finMetaPorFrecuencia      = perfil.metaAhorroPorFrecuencia ?? 0;
-    this.finCantidadFrecuencias    = perfil.cantidadFrecuencias   ?? 0;
-    this.finSaldoDisponible        = fin.saldoDisponible          ?? 0;
-    this.finFrecuencia             = perfil.frecuenciaAhorro      ?? 'mensual';
+    this.finCantidadFrecuencias    = perfil.cantidadFrecuencias     ?? 0;
+    this.finSaldoDisponible        = fin.saldoDisponible            ?? 0;
+    this.finFrecuencia             = perfil.frecuenciaAhorro        ?? 'MENSUAL';
 
     // Restaurar alertas cerradas en esta sesión
     const dismissed = sessionStorage.getItem('alertasDismissed');

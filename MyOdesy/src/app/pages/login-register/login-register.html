@@ -13,10 +13,10 @@
       <section class="forms">
         <section class="tab-switcher" aria-label="Seleccionar formulario">
           <button class="tab-btn" [class.active]="activeTab === 'login'" (click)="switchTab('login')">
-            Login
+            Iniciar sesión
           </button>
           <button class="tab-btn" [class.active]="activeTab === 'register'" (click)="switchTab('register')">
-            Register
+            Registrarse
           </button>
           <div class="tab-indicator" [class.right]="activeTab === 'register'"></div>
         </section>
@@ -24,12 +24,12 @@
         <article class="auth-form slide-in" *ngIf="activeTab === 'login'">
           <form (ngSubmit)="onLogin()" #loginForm="ngForm">
             <div class="form-group">
-              <label for="loginEmail">Email</label>
+              <label for="loginEmail">Correo electrónico</label>
               <input id="loginEmail" type="email" [(ngModel)]="loginData.email" name="email"
-                placeholder="tu@email.com" autocomplete="email" required />
+                placeholder="tu@correo.com" autocomplete="email" required />
             </div>
             <div class="form-group">
-              <label for="loginPassword">Password</label>
+              <label for="loginPassword">Contraseña</label>
               <input id="loginPassword" type="password" [(ngModel)]="loginData.password" name="password"
                 placeholder="••••••••" autocomplete="current-password" required />
             </div>
@@ -37,12 +37,12 @@
               <label class="checkbox-label" for="remember">
                 <input id="remember" type="checkbox" [(ngModel)]="loginData.remember" name="remember" />
                 <span class="checkmark"></span>
-                Remember Password
+                Recordar contraseña
               </label>
             </div>
             <p class="error-msg" role="alert" *ngIf="errorMsg">{{ errorMsg }}</p>
             <button type="submit" class="submit-btn" [disabled]="loading">
-              {{ loading ? 'Loading...' : 'access' }} <span class="btn-arrow">→</span>
+              {{ loading ? 'Cargando...' : 'Acceder' }} <span class="btn-arrow">→</span>
             </button>
           </form>
         </article>
@@ -50,47 +50,40 @@
         <article class="auth-form slide-in" *ngIf="activeTab === 'register'">
           <form (ngSubmit)="onRegister()" #registerForm="ngForm">
             <div class="form-group">
-              <label for="regFirstName">First name</label>
+              <label for="regFirstName">Nombre</label>
               <input id="regFirstName" type="text" [(ngModel)]="registerData.firstName" name="firstName"
-                placeholder="Daniela" autocomplete="given-name" required />
+                placeholder="Tu nombre" autocomplete="given-name" required />
             </div>
             <div class="form-group">
-              <label for="regLastName">Last name</label>
+              <label for="regLastName">Apellido</label>
               <input id="regLastName" type="text" [(ngModel)]="registerData.lastName" name="lastName"
-                placeholder="Pérez" autocomplete="family-name" required />
+                placeholder="Tu apellido" autocomplete="family-name" required />
             </div>
             <div class="form-group">
-              <label for="regUsername">Username</label>
+              <label for="regUsername">Usuario</label>
               <input id="regUsername" type="text" [(ngModel)]="registerData.username" name="username"
-                placeholder="dani.perez" autocomplete="username" required />
+                placeholder="tu.usuario" autocomplete="username" required />
             </div>
             <div class="form-group">
-              <label for="regEmail">Email</label>
+              <label for="regEmail">Correo electrónico</label>
               <input id="regEmail" type="email" [(ngModel)]="registerData.email" name="email"
-                placeholder="tu@email.com" autocomplete="email" required />
+                placeholder="tu@correo.com" autocomplete="email" required />
             </div>
             <div class="form-group">
-              <label for="regPassword">Password</label>
+              <label for="regPassword">Contraseña</label>
               <input id="regPassword" type="password" [(ngModel)]="registerData.password" name="password"
-                placeholder="Min. 8 characters" autocomplete="new-password" required />
-            </div>
-            <div class="remember-row">
-              <label class="checkbox-label" for="terms">
-                <input id="terms" type="checkbox" [(ngModel)]="registerData.terms" name="terms" />
-                <span class="checkmark"></span>
-                I accept the terms
-              </label>
+                placeholder="Mín. 8 caracteres" autocomplete="new-password" required />
             </div>
             <p class="error-msg" role="alert" *ngIf="errorMsg">{{ errorMsg }}</p>
             <button type="submit" class="submit-btn" [disabled]="loading">
-              {{ loading ? 'Creating...' : 'Register' }} <span class="btn-arrow">→</span>
+              {{ loading ? 'Creando...' : 'Registrarse' }} <span class="btn-arrow">→</span>
             </button>
           </form>
         </article>
 
       </section>
       <div class="auth-footer">
-        <a class="back-link" routerLink="/">← Back to main page</a>
+        <a class="back-link" routerLink="/">← Volver al inicio</a>
       </div>
     </section>
     

@@ -21,18 +21,6 @@ export interface AuthResponse {
   lastName: string;
 }
 
-// ── Users ─────────────────────────────────────────────────────────────────────
-
-export interface SystemUser {
-  userId: number;
-  email: string;
-  username: string;
-  person?: {
-    firstName?: string;
-    lastName?: string;
-  };
-}
-
 // ── Session (guardado en sessionStorage) ─────────────────────────────────────
 
 export interface SessionData {
@@ -44,27 +32,110 @@ export interface SessionData {
   lastName: string;
 }
 
-// ── Gym ───────────────────────────────────────────────────────────────────────
+// ── Users ─────────────────────────────────────────────────────────────────────
 
-export interface GymGoalDto {
-  gymGoalId?: number;
+export interface SystemUser {
   userId: number;
-  categoryId: number;
-  weeklyGymDays: number;     // cantidad_dias_gym_semana → días por semana configurados
-  targetDaysPerWeek: number; // dias_para_ir_gym_semana  → mismo valor (meta semanal)
-  activeGoal: boolean;
+  email: string;
+  username: string;
 }
 
-// ── Finance ───────────────────────────────────────────────────────────────────
+// ── Gym: meta ─────────────────────────────────────────────────────────────────
 
+/**
+ * POST/PUT /api/myodesy/gymGoals
+ * diasParaIrGymSemana: ["MONDAY", "WEDNESDAY", "FRIDAY"]
+ * El backend calcula cantidadDiasGymSemana = diasParaIrGymSemana.size()
+ */
+export interface MetaGymDto {
+  idMetaGym?: number;
+  idUsuario: number;
+  categoria?: number;
+  diasParaIrGymSemana: string[];   // MONDAY | TUESDAY | ... | SUNDAY
+  metaActivaDelGym?: boolean;
+}
+
+// ── Gym: racha ────────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/myodesy/rachas/gym/estado/{idMetaGym}
+ * POST /api/myodesy/rachas/gym/registrar  → devuelve este mismo DTO
+ */
+export interface RachaGymEstadoDTO {
+  idRachaGym: number;
+  idMetaGym: number;
+  diasConfigurados: string[];       // días que el usuario configuró
+  diasMarcadosEstaSemana: string[]; // días ya marcados esta semana
+  diasCompletadosSemana: number;
+  cantidadDiasGymSemana: number;
+  rachaActual: number;
+  mayorRacha: number;
+  rachaActiva: boolean;
+  weekStart: string;                // LocalDate serializado: "2026-05-26"
+}
+
+/** POST /api/myodesy/rachas/gym/registrar */
+export interface RegistroGymDTO {
+  idMetaGym: number;
+  diaGym: string;   // "MONDAY" | "TUESDAY" | ... | "SUNDAY"
+}
+
+// ── Finance: meta ─────────────────────────────────────────────────────────────
+
+/**
+ * POST/PUT /api/myodesy/financeGoals
+ * frecuenciaAhorro: "SEMANAL" | "MENSUAL"
+ */
 export interface FinanceGoalDto {
-  financeGoalId?: number;
-  userId: number;
-  categoryId: number;
-  monthlySavingGoal: number;  // meta_de_ahorro_del_mes
-  currentSaving: number;      // ahorro_actual
-  monthlyExpenses: number;    // gastos_del_mes
-  yearlyGoal: number;         // meta_anual
-  monthlyIncome: number;      // ingresos_del_mes (saldo disponible)
-  categoryFinanceId: number;  // 1 = semanal, 2 = mensual
+  idMetaFinanza?: number;
+  idUsuario: number;
+  categoria: number;
+  ahorroActual?: number;
+  categoriasDeFinanzas: number;
+  frecuenciaAhorro: 'SEMANAL' | 'MENSUAL';
+  cantidadFrecuencias: number;
+  metaAhorro: number;
+}
+
+// ── Finance: racha ────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/myodesy/rachas/finanzas/estado/{idMetaFinanza}
+ * POST /api/myodesy/rachas/finanzas/registrar → devuelve este mismo DTO
+ */
+export interface RachaFinanzasEstadoDTO {
+  idRachaFinanza: number;
+  idMetaFinanza: number;
+  rachaActual: number;
+  mayorRacha: number;
+  rachaActiva: boolean;
+  cantidadFrecuencias: number;
+  periodoActual: number;
+  periodoRegistrado: boolean;
+  ahorroActual: number;
+  metaAhorro: number;
+  frecuenciaAhorro: string;
+  fechaVencimiento: string;  // LocalDate: "2026-05-31"
+}
+
+/** POST /api/myodesy/rachas/finanzas/registrar */
+export interface RegistroFinanzasDTO {
+  idMetaFinanza: number;
+  montoAhorro: number;
+}
+
+// ── Historial ─────────────────────────────────────────────────────────────────
+
+export interface HistorialRachasDto {
+  idHistorial: number;
+  dia: string;
+  completado: boolean;
+  horaCompletado: string;
+  acumulacion: number;
+  notas: string;
+  fechaCreacion: string;
+  idRachaGym: number;
+  idRachaFinanza: number;
+  ahorroPorRacha: number;
+  evento: string;
 }

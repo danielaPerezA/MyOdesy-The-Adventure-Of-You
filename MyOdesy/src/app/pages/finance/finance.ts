@@ -5,7 +5,7 @@ import { Navbar } from '../../components/navbar/navbar';
 import { Footer } from '../../components/footer/footer';
 import { FinanceService } from '../../services/finance/finance';
 import { AuthService } from '../../services/my-odesy';
-import { FinanceGoalDto } from '../../core/models/api.models';
+import { FinanceGoalDto, RachaFinanzasEstadoDTO } from '../../core/models/api.models';
 
 @Component({
   selector: 'app-finance',
@@ -17,23 +17,34 @@ import { FinanceGoalDto } from '../../core/models/api.models';
 export class Finance implements OnInit {
   username = '';
 
-  // ID de la meta en la BD
-  private financeGoalId: number | null = null;
+  // IDs de la BD
+  private idMetaFinanza: number | null = null;
   private userId = 0;
 
+  // Estado de racha desde la API
+  rachaEstado: RachaFinanzasEstadoDTO | null = null;
+
+  // Getters de racha derivados del estado API
+  get streakCount(): number        { return this.rachaEstado?.rachaActual     ?? 0; }
+  get mayorRacha(): number         { return this.rachaEstado?.mayorRacha      ?? 0; }
+  get cantidadFrecuencias(): number { return this.rachaEstado?.cantidadFrecuencias ?? this._cantidadFrecuencias; }
+  get periodoActual(): number      { return this.rachaEstado?.periodoActual   ?? 0; }
+  get periodoRegistrado(): boolean { return this.rachaEstado?.periodoRegistrado ?? false; }
+  get montoAhorrado(): number      { return this.rachaEstado?.ahorroActual    ?? this._montoAhorrado; }
+  get metaAhorroPorFrecuencia(): number { return this.rachaEstado?.metaAhorro ?? this._metaAhorroPorFrecuencia; }
+
+  // Estado local (campos que el backend no almacena en la meta de ahorro)
   saldoDisponible = 0;
   montoGastos = 0;
   metaAnual = 0;
   metaMensual = 0;
-  montoAhorrado = 0;
-  metaAhorroAnual = 0;
-  streakCount = 0;
-  mayorRacha = 0;
 
-  frecuenciaAhorro: 'semanal' | 'mensual' = 'mensual';
-  cantidadFrecuencias = 0;
-  metaAhorroPorFrecuencia = 0;
-  ahorroFrecuenciaActual = 0;
+  // Backing fields para los getters
+  private _cantidadFrecuencias = 0;
+  private _montoAhorrado = 0;
+  private _metaAhorroPorFrecuencia = 0;
+
+  frecuenciaAhorro: 'SEMANAL' | 'MENSUAL' = 'MENSUAL';
 
   categorias = ['Comida', 'Transporte', 'Entretenimiento', 'Salud', 'Educación', 'Otros'];
 
@@ -77,29 +88,21 @@ export class Finance implements OnInit {
 
     this.cargarDesdeLocalStorage();
 
-    // Cargar meta desde la API
     if (this.userId) {
       this.financeService.getByUserId(this.userId).subscribe(goal => {
-        if (goal) {
-          this.financeGoalId     = goal.financeGoalId ?? null;
-          this.metaMensual       = goal.monthlySavingGoal ?? this.metaMensual;
-          this.montoAhorrado     = goal.currentSaving     ?? this.montoAhorrado;
-          this.montoGastos       = goal.monthlyExpenses   ?? this.montoGastos;
-          this.metaAnual         = goal.yearlyGoal        ?? this.metaAnual;
-          this.metaAhorroAnual   = this.metaAnual;
-          this.saldoDisponible   = goal.monthlyIncome     ?? this.saldoDisponible;
-          this.frecuenciaAhorro  = goal.categoryFinanceId === 1 ? 'semanal' : 'mensual';
-          // Persistir en local para la próxima visita offline
-          this.guardarFinanzas();
-          this.actualizarProgresoMes();
+        if (goal?.idMetaFinanza) {
+          this.idMetaFinanza = goal.idMetaFinanza;
+          this._cantidadFrecuencias = goal.cantidadFrecuencias ?? 0;
+          this._metaAhorroPorFrecuencia = Number(goal.metaAhorro) ?? 0;
+          this.frecuenciaAhorro = goal.frecuenciaAhorro as 'SEMANAL' | 'MENSUAL';
+          // Cargar estado de racha
+          this.cargarRachaEstado(goal.idMetaFinanza);
         }
       });
     }
-
-    this.verificarNuevaFrecuencia();
   }
 
-  // ── Formato de montos ─────────────────────────────────────────────────────
+  // ── Formato ───────────────────────────────────────────────────────────────
 
   parseMonto(valor: string): number {
     if (!valor) return 0;
@@ -145,115 +148,64 @@ export class Finance implements OnInit {
 
   private cargarDesdeLocalStorage() {
     const perfil = JSON.parse(localStorage.getItem('perfilUsuario') || '{}');
-    if (perfil.metaAhorroMensual)       this.metaMensual            = perfil.metaAhorroMensual;
-    if (perfil.metaAhorroAnual)          this.metaAnual              = perfil.metaAhorroAnual;
-    if (perfil.frecuenciaAhorro)         this.frecuenciaAhorro       = perfil.frecuenciaAhorro;
-    if (perfil.cantidadFrecuencias)      this.cantidadFrecuencias    = perfil.cantidadFrecuencias;
-    if (perfil.metaAhorroPorFrecuencia)  this.metaAhorroPorFrecuencia = perfil.metaAhorroPorFrecuencia;
+    if (perfil.metaAhorroMensual)        this.metaMensual               = perfil.metaAhorroMensual;
+    if (perfil.metaAhorroAnual)          this.metaAnual                 = perfil.metaAhorroAnual;
+    if (perfil.frecuenciaAhorro)         this.frecuenciaAhorro          = perfil.frecuenciaAhorro;
+    if (perfil.cantidadFrecuencias)      this._cantidadFrecuencias      = perfil.cantidadFrecuencias;
+    if (perfil.metaAhorroPorFrecuencia)  this._metaAhorroPorFrecuencia  = perfil.metaAhorroPorFrecuencia;
 
     const finanzas = JSON.parse(localStorage.getItem('datosFinanzas') || '{}');
-    if (finanzas.saldoDisponible !== undefined)      this.saldoDisponible      = finanzas.saldoDisponible;
-    if (finanzas.montoGastos !== undefined)          this.montoGastos          = finanzas.montoGastos;
-    if (finanzas.montoAhorrado !== undefined)        this.montoAhorrado        = finanzas.montoAhorrado;
-    if (finanzas.metaAhorroAnual !== undefined)      this.metaAhorroAnual      = finanzas.metaAhorroAnual;
-    if (finanzas.streakCount !== undefined)          this.streakCount          = finanzas.streakCount;
-    if (finanzas.mayorRacha !== undefined)           this.mayorRacha           = finanzas.mayorRacha;
-    if (finanzas.ahorroFrecuenciaActual !== undefined) this.ahorroFrecuenciaActual = finanzas.ahorroFrecuenciaActual;
+    if (finanzas.saldoDisponible !== undefined) this.saldoDisponible = finanzas.saldoDisponible;
+    if (finanzas.montoGastos !== undefined)     this.montoGastos    = finanzas.montoGastos;
+    if (finanzas.montoAhorrado !== undefined)   this._montoAhorrado = finanzas.montoAhorrado;
 
     const progreso = localStorage.getItem('progresoFinanzas');
     if (progreso) this.progresoAnual = JSON.parse(progreso);
   }
 
-  guardarFinanzas() {
+  guardarLocal() {
     localStorage.setItem('datosFinanzas', JSON.stringify({
-      saldoDisponible:      this.saldoDisponible,
-      montoGastos:          this.montoGastos,
-      montoAhorrado:        this.montoAhorrado,
-      metaAhorroAnual:      this.metaAhorroAnual,
-      streakCount:          this.streakCount,
-      mayorRacha:           this.mayorRacha,
-      ahorroFrecuenciaActual: this.ahorroFrecuenciaActual,
+      saldoDisponible: this.saldoDisponible,
+      montoGastos:     this.montoGastos,
+      montoAhorrado:   this._montoAhorrado,
     }));
   }
 
-  /** Construye el DTO para enviar a la API. */
   private buildDto(): FinanceGoalDto {
     return {
-      financeGoalId:    this.financeGoalId ?? undefined,
-      userId:           this.userId,
-      categoryId:       1,
-      monthlySavingGoal: this.metaMensual,
-      currentSaving:    this.montoAhorrado,
-      monthlyExpenses:  this.montoGastos,
-      yearlyGoal:       this.metaAnual,
-      monthlyIncome:    this.saldoDisponible,
-      categoryFinanceId: this.frecuenciaAhorro === 'semanal' ? 1 : 2,
+      idMetaFinanza:        this.idMetaFinanza ?? undefined,
+      idUsuario:            this.userId,
+      categoria:            1,
+      ahorroActual:         this._montoAhorrado,
+      categoriasDeFinanzas: 1,
+      frecuenciaAhorro:     this.frecuenciaAhorro,
+      cantidadFrecuencias:  this._cantidadFrecuencias,
+      metaAhorro:           this._metaAhorroPorFrecuencia,
     };
   }
 
-  /** Sincroniza la meta de finanzas con la API. */
   private sincronizarMeta() {
-    if (!this.userId) return;
+    if (!this.userId || this._cantidadFrecuencias <= 0 || this._metaAhorroPorFrecuencia <= 0) return;
     this.financeService.createOrUpdate(this.buildDto()).subscribe(saved => {
-      this.financeGoalId = saved.financeGoalId ?? this.financeGoalId;
+      this.idMetaFinanza = saved.idMetaFinanza ?? this.idMetaFinanza;
+      if (this.idMetaFinanza) this.cargarRachaEstado(this.idMetaFinanza);
     });
   }
 
-  // ── Lógica de racha (automática) ──────────────────────────────────────────
-
-  private getSemanaAnio(): number {
-    const ahora = new Date();
-    const inicioAnio = new Date(ahora.getFullYear(), 0, 1);
-    const dias = Math.floor((ahora.getTime() - inicioAnio.getTime()) / 86400000);
-    return Math.ceil((dias + inicioAnio.getDay() + 1) / 7);
+  private cargarRachaEstado(idMetaFinanza: number) {
+    this.financeService.getRachaEstado(idMetaFinanza).subscribe(estado => {
+      this.rachaEstado = estado;
+      this.cacheRachaEnLocalStorage();
+    });
   }
 
-  private getMesAnio(): string {
-    const ahora = new Date();
-    return `${ahora.getFullYear()}-${ahora.getMonth()}`;
-  }
-
-  private getClaveRacha(): string {
-    return this.frecuenciaAhorro === 'semanal'
-      ? `racha-finanzas-sem-${this.getSemanaAnio()}`
-      : `racha-finanzas-mes-${this.getMesAnio()}`;
-  }
-
-  private verificarNuevaFrecuencia() {
-    const claveActual = this.getClaveRacha();
-    const ultimaFrecuencia = localStorage.getItem('ultimaFrecuenciaFinanzas');
-
-    if (ultimaFrecuencia && ultimaFrecuencia !== claveActual) {
-      const meta = this.metaAhorroPorFrecuencia || this.metaMensual;
-      if (meta > 0) {
-        const ultimaRacha = localStorage.getItem('ultimaRachaFinanzas');
-        if (ultimaRacha !== ultimaFrecuencia) {
-          if (this.ahorroFrecuenciaActual >= meta) {
-            this.completarRacha(this.ahorroFrecuenciaActual);
-          } else {
-            this.streakCount = 0;
-          }
-        }
-      }
-      this.ahorroFrecuenciaActual = 0;
-      localStorage.setItem('ultimaFrecuenciaFinanzas', claveActual);
-      this.guardarFinanzas();
-    } else if (!ultimaFrecuencia) {
-      localStorage.setItem('ultimaFrecuenciaFinanzas', claveActual);
-    }
-  }
-
-  private completarRacha(ahorroPeriodo: number) {
-    const claveActual = this.getClaveRacha();
-    this.streakCount++;
-    if (this.streakCount > this.mayorRacha) this.mayorRacha = this.streakCount;
-    localStorage.setItem('ultimaRachaFinanzas', claveActual);
-  }
-
-  getCirculosActivos(): number {
-    if (this.cantidadFrecuencias <= 0 || this.streakCount <= 0) return 0;
-    const resto = this.streakCount % this.cantidadFrecuencias;
-    return resto === 0 ? this.cantidadFrecuencias : resto;
+  private cacheRachaEnLocalStorage() {
+    if (!this.rachaEstado) return;
+    const fin = JSON.parse(localStorage.getItem('datosFinanzas') || '{}');
+    fin.streakCount           = this.rachaEstado.rachaActual;
+    fin.mayorRacha            = this.rachaEstado.mayorRacha;
+    fin.ahorroFrecuenciaActual = this.rachaEstado.ahorroActual;
+    localStorage.setItem('datosFinanzas', JSON.stringify(fin));
   }
 
   // ── Progreso ──────────────────────────────────────────────────────────────
@@ -264,29 +216,31 @@ export class Finance implements OnInit {
       4: 'May', 5: 'Jun', 6: 'Jul', 7: 'Aug',
       8: 'Sep', 9: 'Oct', 10: 'Nov', 11: 'Dic',
     };
-    const mesActual = mesesEs[new Date().getMonth()];
-    const idx = this.progresoAnual.findIndex(p => p.mes === mesActual);
+    const idx = this.progresoAnual.findIndex(p => p.mes === mesesEs[new Date().getMonth()]);
     if (idx !== -1 && this.metaMensual > 0) {
       this.progresoAnual[idx].porcentaje = Math.min(
-        Math.round((this.montoAhorrado / this.metaMensual) * 100), 100
+        Math.round((this._montoAhorrado / this.metaMensual) * 100), 100
       );
-      if (this.categoriaGasto) {
-        this.progresoAnual[idx].categoria = this.categoriaGasto;
-      }
+      if (this.categoriaGasto) this.progresoAnual[idx].categoria = this.categoriaGasto;
     }
     localStorage.setItem('progresoFinanzas', JSON.stringify(this.progresoAnual));
   }
 
   calcularProgresoAnual(): number {
-    const meta = this.metaAhorroAnual || this.metaAnual;
+    const meta = this.metaAnual;
     if (meta <= 0) return 0;
-    return Math.min(Math.round((this.montoAhorrado / meta) * 100), 100);
+    return Math.min(Math.round((this._montoAhorrado / meta) * 100), 100);
   }
 
   calcularProgresoFrecuencia(): number {
-    const meta = this.metaAhorroPorFrecuencia || this.metaMensual;
+    const meta = this.metaAhorroPorFrecuencia;
     if (meta <= 0) return 0;
-    return Math.min(Math.round((this.ahorroFrecuenciaActual / meta) * 100), 100);
+    const actual = this.rachaEstado?.ahorroActual ?? this._montoAhorrado;
+    return Math.min(Math.round((actual / meta) * 100), 100);
+  }
+
+  getCirculosActivos(): number {
+    return this.rachaEstado?.periodoActual ?? 0;
   }
 
   // ── Acciones del usuario ──────────────────────────────────────────────────
@@ -295,8 +249,7 @@ export class Finance implements OnInit {
     if (!this.montoValido(this.nuevoSaldoStr)) { alert('Monto inválido.'); return; }
     this.saldoDisponible = this.parseMonto(this.nuevoSaldoStr);
     this.nuevoSaldoStr = '';
-    this.guardarFinanzas();
-    this.sincronizarMeta();   // ← API: actualiza monthlyIncome
+    this.guardarLocal();
   }
 
   registrarGasto() {
@@ -314,55 +267,61 @@ export class Finance implements OnInit {
     if (idx !== -1) this.progresoAnual[idx].categoria = this.categoriaGasto;
     this.nuevoGastoStr = '';
     this.categoriaGasto = '';
-    this.guardarFinanzas();
+    this.guardarLocal();
     localStorage.setItem('progresoFinanzas', JSON.stringify(this.progresoAnual));
-    this.sincronizarMeta();   // ← API: actualiza monthlyExpenses
   }
 
+  /**
+   * Registra ahorro del período actual.
+   * Llama al API → el backend evalúa si se cumplió la meta y actualiza la racha.
+   */
   registrarAhorro() {
     if (!this.montoValido(this.nuevoAhorroStr)) { alert('Monto inválido.'); return; }
-    const montoNuevo = this.parseMonto(this.nuevoAhorroStr);
-    this.montoAhorrado += montoNuevo;
-    this.ahorroFrecuenciaActual += montoNuevo;
-    this.nuevoAhorroStr = '';
-
-    const meta = this.metaAhorroPorFrecuencia || this.metaMensual;
-    const claveActual = this.getClaveRacha();
-    const ultimaRacha = localStorage.getItem('ultimaRachaFinanzas');
-    if (meta > 0 && this.ahorroFrecuenciaActual >= meta && ultimaRacha !== claveActual) {
-      this.completarRacha(this.ahorroFrecuenciaActual);
+    if (!this.idMetaFinanza) {
+      alert('Primero configura tu meta de ahorro (frecuencia + cantidad + monto).');
+      return;
     }
 
+    const monto = this.parseMonto(this.nuevoAhorroStr);
+    this._montoAhorrado += monto;
+    this.nuevoAhorroStr = '';
+
+    this.financeService.registrarAhorro({
+      idMetaFinanza: this.idMetaFinanza,
+      montoAhorro: monto
+    }).subscribe(estado => {
+      this.rachaEstado = estado;
+      this.cacheRachaEnLocalStorage();
+    });
+
     this.actualizarProgresoMes();
-    this.guardarFinanzas();
-    this.sincronizarMeta();   // ← API: actualiza currentSaving
+    this.guardarLocal();
   }
 
-  cambiarFrecuencia(nuevaFrecuencia: 'semanal' | 'mensual') {
+  cambiarFrecuencia(nuevaFrecuencia: 'SEMANAL' | 'MENSUAL') {
     this.frecuenciaAhorro = nuevaFrecuencia;
     const perfil = JSON.parse(localStorage.getItem('perfilUsuario') || '{}');
     perfil.frecuenciaAhorro = nuevaFrecuencia;
     localStorage.setItem('perfilUsuario', JSON.stringify(perfil));
-    this.verificarNuevaFrecuencia();
-    this.sincronizarMeta();   // ← API: actualiza categoryFinanceId
+    this.sincronizarMeta();
   }
 
   configurarCantidadFrecuencias() {
     const n = parseInt(this.editCantidadFrecuenciasStr, 10);
     if (!n || n <= 0) { alert('Ingresa un número válido mayor a 0.'); return; }
-    this.cantidadFrecuencias = n;
+    this._cantidadFrecuencias = n;
     this.editCantidadFrecuenciasStr = '';
     const perfil = JSON.parse(localStorage.getItem('perfilUsuario') || '{}');
     perfil.cantidadFrecuencias = n;
     localStorage.setItem('perfilUsuario', JSON.stringify(perfil));
+    this.sincronizarMeta();
   }
 
   editarSaldo() {
     if (!this.montoValido(this.editSaldoStr)) { alert('Monto inválido.'); return; }
     this.saldoDisponible = this.parseMonto(this.editSaldoStr);
     this.editSaldoStr = '';
-    this.guardarFinanzas();
-    this.sincronizarMeta();
+    this.guardarLocal();
   }
 
   editarMetaMensual() {
@@ -373,44 +332,39 @@ export class Finance implements OnInit {
     const perfil = JSON.parse(localStorage.getItem('perfilUsuario') || '{}');
     perfil.metaAhorroMensual = this.metaMensual;
     localStorage.setItem('perfilUsuario', JSON.stringify(perfil));
-    this.sincronizarMeta();   // ← API
   }
 
   editarMetaAnual() {
     if (!this.montoValido(this.editMetaAnualStr)) { alert('Monto inválido.'); return; }
     this.metaAnual = this.parseMonto(this.editMetaAnualStr);
-    this.metaAhorroAnual = this.metaAnual;
     this.editMetaAnualStr = '';
-    this.guardarFinanzas();
     const perfil = JSON.parse(localStorage.getItem('perfilUsuario') || '{}');
     perfil.metaAhorroAnual = this.metaAnual;
     localStorage.setItem('perfilUsuario', JSON.stringify(perfil));
-    this.sincronizarMeta();   // ← API
   }
 
   editarMetaFrecuencia() {
     if (!this.montoValido(this.editMetaFrecuenciaStr)) { alert('Monto inválido.'); return; }
-    this.metaAhorroPorFrecuencia = this.parseMonto(this.editMetaFrecuenciaStr);
+    this._metaAhorroPorFrecuencia = this.parseMonto(this.editMetaFrecuenciaStr);
     this.editMetaFrecuenciaStr = '';
     const perfil = JSON.parse(localStorage.getItem('perfilUsuario') || '{}');
-    perfil.metaAhorroPorFrecuencia = this.metaAhorroPorFrecuencia;
+    perfil.metaAhorroPorFrecuencia = this._metaAhorroPorFrecuencia;
     localStorage.setItem('perfilUsuario', JSON.stringify(perfil));
+    this.sincronizarMeta();
   }
 
   editarAhorro() {
     if (!this.montoValido(this.editAhorroStr)) { alert('Monto inválido.'); return; }
-    this.montoAhorrado = this.parseMonto(this.editAhorroStr);
+    this._montoAhorrado = this.parseMonto(this.editAhorroStr);
     this.editAhorroStr = '';
     this.actualizarProgresoMes();
-    this.guardarFinanzas();
-    this.sincronizarMeta();   // ← API
+    this.guardarLocal();
   }
 
   editarGastos() {
     if (!this.montoValido(this.editGastosStr)) { alert('Monto inválido.'); return; }
     this.montoGastos = this.parseMonto(this.editGastosStr);
     this.editGastosStr = '';
-    this.guardarFinanzas();
-    this.sincronizarMeta();   // ← API
+    this.guardarLocal();
   }
 }

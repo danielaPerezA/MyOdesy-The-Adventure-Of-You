@@ -83,7 +83,7 @@
           <div class="pendiente-card__header">
             <span class="pendiente-card__icon">💰</span>
             <span class="pendiente-card__label">
-              Ahorro {{ finFrecuencia === 'semanal' ? 'semanal' : 'mensual' }}
+              Ahorro {{ finFrecuencia === 'SEMANAL' ? 'semanal' : 'mensual' }}
             </span>
             <span class="pendiente-card__badge" *ngIf="finPeriodoCompleto">✔ Completado</span>
             <span class="pendiente-card__badge pendiente-card__badge--pending" *ngIf="!finPeriodoCompleto && finMetaPorFrecuencia > 0">

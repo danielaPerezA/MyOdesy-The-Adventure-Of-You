@@ -20,7 +20,7 @@
         <div class="finance-streak__calendar" *ngIf="cantidadFrecuencias > 0">
           <div *ngFor="let i of getRange(cantidadFrecuencias)" class="streak-col">
             <span class="streak-month">
-              {{ frecuenciaAhorro === 'semanal' ? 'S' + (i + 1) : 'M' + (i + 1) }}
+              {{ frecuenciaAhorro === 'SEMANAL' ? 'S' + (i + 1) : 'M' + (i + 1) }}
             </span>
             <span class="circle" [class.active]="i < getCirculosActivos()"></span>
           </div>
@@ -35,7 +35,7 @@
         <!-- Progreso del período actual -->
         <div class="streak-period-progress" *ngIf="(metaAhorroPorFrecuencia || metaMensual) > 0">
           <p class="streak-period-label">
-            Período actual: {{ formatMonto(ahorroFrecuenciaActual) }} /
+            Período actual: {{ formatMonto(montoAhorrado) }} /
             {{ formatMonto(metaAhorroPorFrecuencia || metaMensual) }} COP
           </p>
           <div class="streak-period-bar">
@@ -85,11 +85,11 @@
           <label>Frecuencia de ahorro</label>
           <div class="form-row__inline">
             <button
-              [class.active]="frecuenciaAhorro === 'semanal'"
-              (click)="cambiarFrecuencia('semanal')">Semanal</button>
+              [class.active]="frecuenciaAhorro === 'SEMANAL'"
+              (click)="cambiarFrecuencia('SEMANAL')">Semanal</button>
             <button
-              [class.active]="frecuenciaAhorro === 'mensual'"
-              (click)="cambiarFrecuencia('mensual')">Mensual</button>
+              [class.active]="frecuenciaAhorro === 'MENSUAL'"
+              (click)="cambiarFrecuencia('MENSUAL')">Mensual</button>
           </div>
         </div>
 
@@ -213,7 +213,7 @@
         <div class="finance-annual__header">
           <span class="finance-annual__title">💰 Meta de ahorro anual</span>
           <span class="finance-annual__values">
-            {{ formatMonto(montoAhorrado) }} / {{ formatMonto(metaAhorroAnual || metaAnual) }} COP
+            {{ formatMonto(montoAhorrado) }} / {{ formatMonto(metaAnual) }} COP
           </span>
         </div>
         <div class="finance-annual__bar">
