@@ -7,7 +7,7 @@
     <section class="auth-panel">
       <article class="brand-tag">
         <span class="brand-name">MyOdesy</span>
-        <p class="brand-tagline">The adventure begins with you.</p>
+        <p class="brand-tagline">La aventura comienza contigo.</p>
       </article>
 
       <section class="forms">
@@ -41,8 +41,8 @@
               </label>
             </div>
             <p class="error-msg" role="alert" *ngIf="errorMsg">{{ errorMsg }}</p>
-            <button type="submit" class="submit-btn" [disabled]="loading">
-              {{ loading ? 'Cargando...' : 'Acceder' }} <span class="btn-arrow">→</span>
+            <button type="submit" class="submit-btn" [disabled]="loadingLogin">
+              {{ loadingLogin ? 'Cargando...' : 'Acceder' }} <span class="btn-arrow">→</span>
             </button>
           </form>
         </article>
@@ -75,8 +75,8 @@
                 placeholder="Mín. 8 caracteres" autocomplete="new-password" required />
             </div>
             <p class="error-msg" role="alert" *ngIf="errorMsg">{{ errorMsg }}</p>
-            <button type="submit" class="submit-btn" [disabled]="loading">
-              {{ loading ? 'Creando...' : 'Registrarse' }} <span class="btn-arrow">→</span>
+            <button type="submit" class="submit-btn" [disabled]="loadingRegister">
+              {{ loadingRegister ? 'Creando...' : 'Registrarse' }} <span class="btn-arrow">→</span>
             </button>
           </form>
         </article>

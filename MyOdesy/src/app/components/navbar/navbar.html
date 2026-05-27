@@ -5,14 +5,14 @@
   </div>
 
   <div class="navbar__links" *ngIf="isPrivate">
-    <a routerLink="/home" routerLinkActive="active">Home</a>
+    <a routerLink="/home" routerLinkActive="active">Inicio</a>
     <a routerLink="/finanzas" routerLinkActive="active">Finanzas</a>
     <a routerLink="/gym" routerLinkActive="active">Gym</a>
   </div>
 
   <div class="navbar__actions" *ngIf="!isPrivate">
-    <button class="btn-login" routerLink="/login">Login</button>
-    <button class="btn-signup" routerLink="/login">Sing Up →</button>
+    <button class="btn-login" routerLink="/login">Ingresar</button>
+    <button class="btn-signup" routerLink="/login">Registrarse →</button>
   </div>
 
   <div class="navbar__user" *ngIf="isPrivate">
