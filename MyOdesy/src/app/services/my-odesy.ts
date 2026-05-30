@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, map, catchError, of, switchMap } from 'rxjs';
+import { Observable, map, catchError, of, switchMap, timeout, finalize } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   AuthResponse,
@@ -87,7 +87,11 @@ export class AuthService {
     );
   }
 
-  // ── Register ──────────────────────────────────────────────────────────────
+  // ── Register (auto-login) ─────────────────────────────────────────────────
+  //
+  // Registra al usuario y, si el backend responde OK, guarda la sesión
+  // automáticamente (igual que login) para poder redirigir a /home de inmediato.
+  // Si la petición tarda más de 40 s (cold start de Render), lanza timeout.
 
   register(
     firstName: string,
@@ -99,9 +103,52 @@ export class AuthService {
     const body: RegisterRequest = { firstName, lastName, email, username, password };
 
     return this.http.post<AuthResponse>(`${this.BASE}/api/myodesy/register`, body).pipe(
-      map(() => ({ success: true, message: 'Cuenta creada. Inicia sesión.' })),
+      timeout(40_000),
+      switchMap(authResp => {
+        // Guardar token provisional para la siguiente petición
+        sessionStorage.setItem('token', authResp.token);
+
+        // Buscar el userId por email (igual que en login)
+        return this.http.get<SystemUser[]>(`${this.BASE}/api/myodesy/users`).pipe(
+          map(users => {
+            const user = users.find(u => u.email === email);
+            const session: SessionData = {
+              token:     authResp.token,
+              userId:    user?.userId ?? 0,
+              email:     authResp.email,
+              username:  authResp.username,
+              firstName: authResp.firstName,
+              lastName:  authResp.lastName,
+            };
+            this.saveSession(session);
+            localStorage.setItem('UsuarioLogueado', JSON.stringify({
+              id:    session.userId,
+              name:  `${session.firstName} ${session.lastName}`,
+              email: session.email,
+            }));
+            return { success: true, message: `¡Bienvenida, ${authResp.firstName}!` };
+          }),
+          // Si falla la búsqueda del userId, igual iniciamos sesión con userId=0
+          catchError(() => {
+            const session: SessionData = {
+              token:     authResp.token,
+              userId:    0,
+              email:     authResp.email,
+              username:  authResp.username,
+              firstName: authResp.firstName,
+              lastName:  authResp.lastName,
+            };
+            this.saveSession(session);
+            return of({ success: true, message: `¡Bienvenida, ${authResp.firstName}!` });
+          })
+        );
+      }),
       catchError(err => {
-        const msg = err.error?.message || 'Error al registrar. Intenta de nuevo.';
+        // Timeout o error de red / validación del backend
+        if (err?.name === 'TimeoutError') {
+          return of({ success: false, message: 'El servidor tardó demasiado. Intenta de nuevo en unos segundos.' });
+        }
+        const msg = err?.error?.message || 'Error al registrar. Intenta de nuevo.';
         return of({ success: false, message: msg });
       })
     );

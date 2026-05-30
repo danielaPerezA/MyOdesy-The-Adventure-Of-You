@@ -95,15 +95,19 @@ export class LoginRegister implements OnInit {
     }
 
     this.loadingRegister = true;
-    this.authService.register(firstName, lastName, email, username, password).subscribe(res => {
-      this.loadingRegister = false;
-      if (res.success) {
-        this.errorMsg = '';
-        this.registerData = { firstName: '', lastName: '', username: '', email: '', password: '' };
-        this.switchTab('login');
-      } else {
-        // El backend devuelve mensaje específico si el correo ya existe
-        this.errorMsg = res.message;
+    this.authService.register(firstName, lastName, email, username, password).subscribe({
+      next: res => {
+        this.loadingRegister = false;
+        if (res.success) {
+          // Sesión ya guardada en AuthService → redirigir directo a home
+          this.router.navigate(['/home']);
+        } else {
+          this.errorMsg = res.message;
+        }
+      },
+      error: () => {
+        this.loadingRegister = false;
+        this.errorMsg = 'Ocurrió un error inesperado. Intenta de nuevo.';
       }
     });
   }
